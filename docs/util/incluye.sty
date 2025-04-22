@@ -1,0 +1,61 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{../../util/incluye}[2025/02/01 Lista de paquetes]
+
+% Asigna la tipografía
+\RequirePackage{fontspec}
+% Colores con nombres
+\RequirePackage[dvipsnames]{xcolor}
+% En teoría mejora la legibilidad del texto automáticamente
+\RequirePackage{microtype}
+% Tipografía de matemáticas
+\RequirePackage{eulervm}
+% Idioma
+\RequirePackage[spanish, mexico]{babel}
+% Listas
+\RequirePackage{enumitem}
+% Símbolos matemáticos
+\RequirePackage{amsmath, amssymb, amsfonts, mathtools}
+% Columnas múltiples
+\RequirePackage{multicol}
+% Texto de algoritmos
+\RequirePackage{float}
+\RequirePackage[Algoritmo]{algorithm}
+\RequirePackage[noend]{algpseudocode}
+% Imágenes
+\RequirePackage{graphicx}
+% Dibujitos
+\RequirePackage{tikz}
+% Enlaces presionables
+\RequirePackage{hyperref}
+% Referencias y citas
+\RequirePackage[
+    backend=biber,
+    style=apa,
+    sorting=none,
+    language=spanish
+]{biblatex}
+% Para tener subarchivos y juntarlos en un sólo documento
+\RequirePackage{subfiles}
+% Para márgenes y tamaño de papel
+\RequirePackage[includehead, includefoot,
+    vmargin=20mm,
+    headheight=20mm
+]{geometry}
+% Para los encabezados de página (que no hayan)
+\RequirePackage{fancyhdr}
+% Para los saltos de línea
+\RequirePackage{parskip}
+% Para cajas de colores
+\RequirePackage[most]{tcolorbox}
+% Para crear ambientes personalizados (begin/end)
+\RequirePackage{environ}
+% Para poder crear comillas ""
+\RequirePackage{dirtytalk}
+% Para código
+\RequirePackage{listings}
+% Tablas con titulos
+\RequirePackage{array}
+% Directorios
+\RequirePackage{dirtree}
+% Para que no se salgan los url de la página
+\RequirePackage{breakurl}

@@ -1,0 +1,88 @@
+\documentclass{article}
+\usepackage{../../util/estilo}
+
+\renewcommand{\TituloMain}[0]{Propuesta de Proyecto}
+\newcommand{\SubtituloMain}[0]{Implementación de un Algoritmo Genético Paralelo para el Problema del Agente Viajero}
+\newcommand{\MateriaMain}[0]{Complejidad Computacional}
+\newcommand{\FechaMain}[0]{07 de Mayo de 2025}
+
+\nocite{*}
+
+\begin{document}
+    \begin{titlepage}
+    \begin{centering}
+
+        \thispagestyle{empty}
+        
+        \setlength{\parindent}{0cm}
+        
+        \rule{\linewidth}{0.1mm}
+        \begin{center}
+            \begin{minipage}{2.5cm}
+                \begin{center}
+                \includegraphics[height=2.7cm]{Logo_UNAM.png}
+                \end{center}
+            \end{minipage}\hfill
+            %--------------
+            \begin{minipage}{10cm}
+                \begin{center}
+                \textbf{ Universidad Nacional Autónoma de México}\\[0.1cm]
+                \textbf{Facultad de Ciencias}\\[0.1cm]
+                \textbf{\MateriaMain}\\[0.1cm]
+                \textbf{Semestre 2025-2}\\[0.1cm]
+                \textbf{Integrantes: }\\[0.1cm]
+                319526240 - Romero Palacios Santiago\\[0.1cm]
+                320268135 - Nava Córdova Mariana\\[0.1cm]
+                \FechaMain
+                \end{center}
+            \end{minipage}\hfill
+            %--------------
+            \begin{minipage}{2.5cm}
+                \begin{center}
+                \includegraphics[height=2.7cm]{Logo_FC.png}
+                \end{center}
+            \end{minipage}
+        \end{center}
+        \rule{\linewidth}{0.1mm}
+        
+        
+        
+        \date{}
+        \vspace{0.5cm}
+        \vspace{0.5cm}
+            {\scshape\LARGE \textcolor{Gray}{\TituloMain} \par}
+            {\scshape\Huge \textcolor{RoyalBlue}{\SubtituloMain} \par}
+            {
+                \vspace*{2mm}
+                %\begin{center}\begin{minipage}{6.5cm}
+                %\centering \tableofcontents
+                %\end{minipage}\end{center}
+            }
+        \vspace{0.5cm}
+
+        \subsection*{Descripción}
+
+        El proyecto consistirá en elaborar y evaluar un programa que resuelva
+        el problema del agente viajero mediante un algoritmo genético en
+        paralelo, tanto en CPU como en GPU. Para ello, se realizará una
+        implementación en secuencial y dos en paralelo: en CPU con
+        \href{https://www.openmp.org/}{OpenMP} y GPU con
+        \href{https://developer.nvidia.com/cuda-toolkit}{CUDA}. El lenguaje de
+        elección en todo caso será C++. Nos interesa conocer qué tan
+        eficientemente podemos obtener buenas aproximaciones de problemas
+        NP-Duros con hardware moderno de grado de consumidor, usando el
+        problema del agente viajero euclidiano en su versión de optimización
+        como caso de estudio. En GPU seguiremos cercanamente a \cite{ipn_gpu},
+        y para la versión secuencial a \cite{pav_tesis}. Utilizaremos las
+        recomendaciones de evaluación de metaheurísticas en paralelo de
+        \cite{alba_ch2}.
+        
+        \vspace{1cm}
+        \vfill
+    \end{centering}
+    \printbibliography
+    \end{titlepage}
+
+    \pagestyle{logotipos}
+
+\end{document}

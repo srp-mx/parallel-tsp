@@ -1,0 +1,139 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{../../util/comandos}[2025/02/01 Comandos]
+
+\RequirePackage{../../util/incluye}
+
+%% Caja que rodea el enunciado de un problema
+\newtcolorbox{cajaEnunciado}{
+    enhanced,
+    boxrule=0pt, frame hidden,
+    borderline west={4pt}{0pt}{blue!75!black},
+    colback=blue!10!white,
+    sharp corners
+}
+
+%% Bloque de problema computacional
+% USO: \Problema{Nombre}{Parametros}{Pregunta}
+\newcommand{\Problema}[3]{
+    \begin{center}\begin{minipage}{12cm}
+    \begin{tcolorbox}[colback=blue!10!white, colframe=RoyalBlue!60!black, title={\textbf{{\sffamily\expandafter\MakeUppercase\expandafter{#1}}}}]
+    \textbf{Ejemplar:} {#2} \\
+    \textbf{Pregunta:} {#3}
+    \end{tcolorbox}
+    \end{minipage}\end{center}
+}
+
+%% Texto con subrayado de líneas punteadas ---
+\newcommand{\udash}[1]{%
+    \tikz[baseline=(todotted.base)]{
+        \node[inner sep=1pt,outer sep=0pt] (todotted) {#1};
+        \draw[dashed] (todotted.south west) -- (todotted.south east);
+    }%
+}
+
+%% Texto con subrayado punteado ...
+\newcommand{\udots}[1]{%
+    \tikz[baseline=(todotted.base)]{
+        \node[inner sep=1pt,outer sep=0pt] (todotted) {#1};
+        \draw[dotted] (todotted.south west) -- (todotted.south east);
+    }%
+}%
+
+%% Líneas de relaciones para BD (cardinalidad-participación)
+\newcommand{\totNM}[0]{$=\joinrel=$ }
+\newcommand{\totUN}[0]{$\Longleftarrow$ }
+\newcommand{\totNU}[0]{$\Longrightarrow$ }
+\newcommand{\totUU}[0]{$\Longleftrightarrow$ }
+\newcommand{\parcNM}[0]{{\textemdash} }
+\newcommand{\parcUN}[0]{{\leftarrow}  }
+\newcommand{\parcNU}[0]{{\rightarrow}  }
+\newcommand{\parcUU}[0]{{\leftrightarrow}  }
+
+%% SÍMBOLOS ÚTILES
+\newcommand{\flecha}[1]{\overrightarrow{#1}} % Flecha vector sobre texto
+\newcommand{\ihat}{\boldsymbol{\hat{\textbf{\i}}}} % î
+\newcommand{\jhat}{\boldsymbol{\hat{\textbf{\j}}}} % ĵ
+\newcommand{\khat}{\boldsymbol{\hat{\textbf{k}}}}  % ^k
+\newcommand{\pd}{\underline{\textbf{PD}}: } % Por demostrar
+\newcommand{\boldit}[1]{\textbf{\textit{#1}}} % bold + itálicas
+\newcommand{\dparc}[2]{\frac{\partial #1}{\partial #2}} % atajo para deriv parc
+\newcommand{\deriv}[2]{\frac{\textrm{d}#1}{\textrm{d}#2}} % atajo para deriv ord
+\newcommand{\cjto}[1]{\left\{ #1 \right\}} % paréntesis que ajustan su tamaño
+\newcommand{\pp}[1]{\left( #1 \right)} % paréntesis que ajustan su tamaño
+\newcommand{\ppsq}[1]{\left[ #1 \right]} % corchetes que ajustan su tamaño
+\newcommand{\picos}[1]{\left\langle #1 \right\rangle} % picoparéntesis
+\newcommand{\lnp}[1]{\ln{\left( #1 \right)}} % corchetes que ajustan su tamaño
+\newcommand{\grad}[1]{\nabla #1} % símbolo de gradiente
+\newcommand{\divr}[1]{\nabla \cdot #1} % símbolo de divergencia
+\newcommand{\rotc}[1]{\nabla \times #1} % símbolo de rotacional
+\newcommand{\lapl}[1]{\Delta #1} % símbolo de laplaciano
+\newcommand{\difr}[1]{\hspace{1ex} d#1}
+\newcommand{\¿}{\textquestiondown}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\techo}[1]{\ceil*{#1}}
+\newcommand{\piso}[1]{\floor*{#1}}
+\newcommand\concat{\ensuremath{\mathbin{+\mkern-5mu+}}}
+\newcommand{\domino}[2]{\left[ \frac{#1}{#2} \right]} % una pieza de dominó
+
+%% PALABRAS ALGORITMOS
+% https://ctan.math.utah.edu/ctan/tex-archive/macros/latex/contrib/algorithms/algorithms.pdf
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Salida:}}
+\newcommand{\AndB}{\textbf{and} }
+\newcommand{\OrB}{\textbf{or} }
+\newcommand{\XorB}{\textbf{xor} }
+\newcommand{\NotB}{\textbf{not} }
+
+%% Subrayado rosa (de ejemplo)
+\newcommand{\subrRosa}[1]{%
+    \begingroup
+    \setlength{\fboxsep}{0pt}
+    \colorbox{Lavender!50}{\strut#1}%
+    \endgroup
+}
+
+\makeatletter
+
+% USO
+% \begin{algoritmo}{NombreAlgoritmo}{Ancho}{Etiqueta}
+%     ...
+% \end{algoritmo}
+%
+% EJEMPLO
+% \begin{algoritmo}{StupidSort}{2.5in}{alg:stupidSort}
+%     \Require $A[0 \dots n-1]$
+%     \Ensure $A$ ordenado
+%     \If{$n=2$ \AndB $A[0]>A[1]$}
+%         \State swap $A[0] \leftrightarrow A[1]$
+%     \ElsIf{$n>2$}
+%         \State $m \leftarrow \techo{2n/3}$
+%         \State \texttt{StupidSort}($A[0 \dots m-1]$)
+%         \State \texttt{StupidSort}($A[n-m \dots n-1]$)
+%         \State \texttt{StupidSort}($A[0 \dots m-1]$)
+%     \EndIf
+% \end{algoritmo}
+\NewEnviron{algoritmo}[3]{
+    \begin{center}
+    \begin{minipage}{#2}
+    \begin{algorithm}[H]
+    \caption{\texttt{#1}}\label{#3}
+    \begin{algorithmic}
+        \BODY
+    \end{algorithmic}
+    \end{algorithm}
+    \end{minipage}
+    \end{center}
+}
+
+% USO
+% \InsertaSubarchivo{Titulo Sección}{Nombre en índice}{archivo.tex}
+\newcommand{\InsertaSubarchivo}[3]{
+    \pagestyle{logotipos}
+    \subsection*{{\Large #1}}
+    \addcontentsline{toc}{subsection}{#2}
+    \fancyfoot{} \cfoot{\thepage}
+    \subfile{subs/#3}
+}
+
+\makeatother
