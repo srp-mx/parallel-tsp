@@ -1,0 +1,22 @@
+#!/bin/bash
+
+name="cpuseq"
+build_dir="../../../bin/${name}/"
+this_dir="$(pwd)"
+
+extensions="-g"
+optimizations="-O0"
+libs="-lm"
+warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
+stripping="-fno-rtti -fno-exceptions"
+includes=""
+defs=""
+
+if [ ! -d "$build_dir" ]; then
+    mkdir -p "$build_dir"
+fi
+
+pushd "$build_dir"
+    g++ -c -fPIC $extensions $optimizations $warns $stripping $defs "${this_dir}/${name}.cpp" -o "${name}.o" $includes && \
+    g++ -shared -o "${name}.so" "${name}.o" $libs
+popd

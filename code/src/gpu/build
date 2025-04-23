@@ -1,0 +1,29 @@
+#!/bin/bash
+
+name="gpu"
+build_dir="../../../bin/${name}/"
+this_dir="$(pwd)"
+
+extensions="-g"
+optimizations="-O0"
+libs="-lm"
+warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
+stripping="-fno-rtti -fno-exceptions"
+includes=""
+defs=""
+
+xlinker="$libs"
+xcompiler="-fPIC $extensions $optimizations $warns $stripping $defs"
+cudalibs="-lcudart"
+
+cudaflags="-G -g --keep -Xcompiler=\"$xcompiler\""
+
+if [ ! -d "$build_dir" ]; then
+    mkdir -p "$build_dir"
+fi
+
+pushd "$build_dir"
+    nvcc $cudaflags -ccbin "g++" -dc "${this_dir}/${name}.cu" -o "${name}.o" && \
+    nvcc $cudaflags -ccbin "g++" -shared -o "${name}.so" "${name}.o" $cudalibs -Xlinker "$xlinker"
+popd
+
