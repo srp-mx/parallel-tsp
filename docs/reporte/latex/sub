@@ -1,0 +1,24 @@
+#!/bin/bash
+ejercF=""
+numRegex='^[0-9]+$' 
+
+if [[ ${1} =~ $numRegex ]] ; then
+    ejercF="$(ls subs/ | grep -P '^'$1'-.+\.tex')"
+else
+    ejercF="$(ls subs/ | grep -P '^[0-9]+-'$1'\.tex$')"
+fi
+
+if [ -z ${ejercF} ]; then
+    echo "No se encontro el archivo."
+    exit -1
+fi
+
+seccion="$(echo ${ejercF%.*})"
+latexmk -lualatex -shell-escape "subs/${seccion}.tex"
+mv "${seccion}.pdf" "tmp.pdf"
+
+pdfAppMime="$(xdg-mime query default application/pdf)"
+pdfAppExec="$(cat /usr/share/applications/${pdfAppMime} | grep '^Exec')"
+pdfAppExec5=${pdfAppExec:5}
+execute=$(echo "define(\`U',\`tmp.pdf')${pdfAppExec5//\%}" | m4)
+${execute} ; rm ${seccion}.* ; rm tmp.pdf

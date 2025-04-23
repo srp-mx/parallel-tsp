@@ -1,0 +1,6 @@
+#!/bin/bash
+pdfAppMime="$(xdg-mime query default application/pdf)"
+pdfAppExec="$(cat /usr/share/applications/${pdfAppMime} | grep '^Exec')"
+pdfAppExec5=${pdfAppExec:5}
+execute=$(echo "define(\`U',\`main.pdf')${pdfAppExec5//\%}" | m4)
+./build && ${execute}

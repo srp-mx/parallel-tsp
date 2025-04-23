@@ -1,0 +1,27 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+\begin{cajaEnunciado}
+Haz sandwich.
+\end{cajaEnunciado}
+
+\Problema{Nombre}
+{Parametros}
+{Pregunta}
+
+\begin{algoritmo}{StupidSort}{12cm}{alg:stupidSort}
+    \Require $A[0 \dots n-1]$
+    \Ensure $A$ ordenado
+    \If{$n=2$ \AndB $A[0]>A[1]$}
+        \State swap $A[0] \leftrightarrow A[1]$
+    \ElsIf{$n>2$}
+        \State $m \leftarrow \techo{2n/3}$
+        \State \texttt{StupidSort}($A[0 \dots m-1]$)
+        \State \texttt{StupidSort}($A[n-m \dots n-1]$)
+        \State \texttt{StupidSort}($A[0 \dots m-1]$)
+    \EndIf
+\end{algoritmo}
+
+\end{document}

@@ -1,0 +1,13 @@
+#!/bin/bash
+miGrep=ggrep
+
+if ! type "$miGrep" 2> /dev/null; then
+    miGrep=grep
+fi
+
+ls | $miGrep -F  '.'    \
+   | $miGrep -Fv '.tex' \
+   | $miGrep -Fv '.pdf' \
+   | $miGrep -Fv '.bib' \
+   | $miGrep -Fv 'README.md' \
+   | xargs rm 2> /dev/null
