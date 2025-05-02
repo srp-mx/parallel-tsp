@@ -169,7 +169,10 @@ ReadDirective(parsed_tsp *Parsed, char **Behind, char **Ahead)
     }
     else if (!strcmp(*Behind, "COMMENT"))
     {
-        Parsed->Comment = *Ahead;
+        if (!Parsed->Comment)
+        {
+            Parsed->Comment = *Ahead;
+        }
         while (**Ahead != '\n')
         {
             (*Ahead)++;
