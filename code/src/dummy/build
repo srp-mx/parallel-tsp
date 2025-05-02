@@ -1,6 +1,6 @@
 #!/bin/bash
 
-name="gpu"
+name="dummy"
 build_dir="../../bin/${name}/"
 this_dir="$(pwd)"
 
@@ -12,19 +12,12 @@ stripping="-fno-rtti -fno-exceptions"
 includes="-I../../src/include"
 defs=""
 
-xlinker="$libs"
-xcompiler="-fPIC $extensions $optimizations $warns $stripping $defs"
-cudalibs="-lcudart"
-
-cudaflags="-G -g --keep -Xcompiler=\"$xcompiler\""
-
 if [ ! -d "$build_dir" ]; then
     mkdir -p "$build_dir"
 fi
 
 pushd "$build_dir" 1>> /dev/null
-    nvcc $cudaflags -ccbin "g++" -dc "${this_dir}/${name}.cu" -o "${name}.o" && \
-    nvcc $cudaflags -ccbin "g++" -shared -o "${name}.so" "${name}.o" $cudalibs -Xlinker "$xlinker" && \
+    g++ -c -fPIC $extensions $optimizations $warns $stripping $defs "${this_dir}/${name}.cpp" -o "${name}.o" $includes && \
+    g++ -shared -o "${name}.so" "${name}.o" $libs && \
     cp "${name}.so" ../../data/
 popd 1>> /dev/null
-

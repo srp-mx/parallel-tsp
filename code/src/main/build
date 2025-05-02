@@ -1,20 +1,21 @@
 #!/bin/bash
 
-build_dir="../../bin/main/"
+build_dir="../../bin/"
 this_dir="$(pwd)"
 
 extensions="-g"
-optimizations="-O0"
-libs=""
+optimizations="-O0 -march=native -ftree-vectorize"
+libs="-ldl"
 warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
 stripping="-fno-rtti -fno-exceptions"
-includes=""
+includes="-I../src/include"
 defs=""
 
 if [ ! -d "$build_dir" ]; then
     mkdir -p "$build_dir"
 fi
 
-pushd "$build_dir"
-    g++ $extensions $optimizations $warns $stripping $defs "${this_dir}/main.cpp" -o main $includes $libs
-popd
+pushd "$build_dir" 1>> /dev/null
+    g++ $extensions $optimizations $warns $stripping $defs "${this_dir}/main.cpp" -o main $includes $libs && \
+        cp main ../data/
+popd 1>> /dev/null

@@ -1,0 +1,4 @@
+#!/bin/bash
+pushd ../../data/ 1>> /dev/null
+    ./main
+popd 1>> /dev/null
