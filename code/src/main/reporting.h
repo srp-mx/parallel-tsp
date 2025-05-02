@@ -29,7 +29,8 @@
  *         "problem": "...",
  *         "solver": "...",
  *         "n": 123,
- *         "executions": 123
+ *         "executions": 123,
+ *         "machine": "..."
  *     },
  *     "best_solution": {
  *         "route": [ 1, 2, 3, ... ],
@@ -78,7 +79,8 @@
     "        \"problem\": \"%s\",\n" \
     "        \"solver\": \"%s\",\n" \
     "        \"n\": %d,\n" \
-    "        \"executions\": %d\n" \
+    "        \"executions\": %d,\n" \
+    "        \"machine\": \"%s\"\n" \
     "    },\n"
 
 #define FMTSTR_BESTSOL \
@@ -152,7 +154,7 @@ ReportToStr(report_data *Data, char *Buffer)
         size_t Written = 0;
         Written += sizeof(FMTSTR_REPORT)+1;
         Written += DateTimeStr(0) + strlen(Data->Problem)
-            + strlen(Data->Solver) + 20*2; // metadata values
+            + strlen(Data->Solver) + 20*2 + 10; // metadata values
         Written += 20*Data->N + 25 + 20; // best_solution values
         Written += 20*2*4 + 20*2*2 + 25*2*2; // stats values
         Written += 2*25*Data->Execs + 2*20*Data->Execs; // raw_metrics values
@@ -160,6 +162,8 @@ ReportToStr(report_data *Data, char *Buffer)
     }
 
     // First, obtain everything that will be formatted as a string.
+    char Machine[6];
+    gethostname(Machine, sizeof(Machine));
     char Datetime[DateTimeStr(0)];
     DateTimeStr(Datetime);
     char RouteStr[20*Data->N];
@@ -201,7 +205,7 @@ ReportToStr(report_data *Data, char *Buffer)
     i32 E = Data->Execs;
     return sprintf(Buffer, FMTSTR_REPORT,
         // "metadata"
-        Datetime, Data->Problem, Data->Solver, Data->N, Data->Execs,
+        Datetime, Data->Problem, Data->Solver, Data->N, Data->Execs, Machine,
         // "best_solution"
         RouteStr, Data->BestCost, Data->BestCostIdx,
         // "stats.cost"
