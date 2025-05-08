@@ -27,6 +27,7 @@
 #define FMTSTR_PROBLEM "PROBLEMA: %s\n    %s\n"
 #define FMTSTR_ITERS "ITERACIONES: %lu\n"
 #define FMTSTR_EXECS "EJECUCIONES: %lu\n"
+#define FMTSTR_CUTOFF "COSTO DE CORTE: %e\n"
 
 /**
  * Contains the execution configuration.
@@ -40,6 +41,7 @@ struct config
     char *Comment;
     solver Solver;
     u64 Iterations, Executions;
+    r32 Cutoff;
 };
 
 /**
@@ -76,7 +78,8 @@ ConfigToStr(config *Config, char *Buffer)
         return sizeof(FMTSTR_SOLVER) + sizeof(FMTSTR_PROBLEM)
             + sizeof(FMTSTR_ITERS) + sizeof(FMTSTR_EXECS) + ProblemNameLen
             + ProblemCommentLen + 20*3 + strlen(SolverName)
-            + strlen(SolverDesc) + 1;
+            + strlen(SolverDesc)
+            + sizeof(FMTSTR_CUTOFF) + 25 + 1;
     }
 
     // If there is a buffer, just sprintf it.
@@ -99,6 +102,10 @@ ConfigToStr(config *Config, char *Buffer)
     if (Config->Iterations != 1)
     {
         Written += sprintf(Buffer+Written, FMTSTR_ITERS, Config->Iterations);
+    }
+    if (Config->Cutoff > 0.0f)
+    {
+        Written += sprintf(Buffer+Written, FMTSTR_CUTOFF, Config->Cutoff);
     }
 
     return Written;

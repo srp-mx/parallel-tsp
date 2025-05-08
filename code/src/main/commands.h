@@ -78,6 +78,7 @@ PrintHelp(config *__restrict__ Config, char *__restrict__ Arg)
         "    solver <nombre del solucionador>: Asigna el algoritmo del solucionador\n"
         "    iterations <entero positivo>: Asigna el número de iteraciones por ejecución\n"
         "    executions <entero positivo>: Asigna el número de ejecuciones del algoritmo\n"
+        "    cutoff <número positivo>: Asigna el valor suficiente de costo de la solución\n"
         "    config: Imprime los datos de la configuración actual\n"
         "    exit: Cierra el programa\n"
         "    run: Ejecuta el programa con la configuración dada\n"
@@ -263,6 +264,26 @@ SetExecutions(config *__restrict__ Config, char *__restrict__ Arg)
 }
 
 /**
+ * Sets the upper bound on the target cost. If the solver's cost reaches or
+ * improves upon this, it should exit and return the solution.
+ * Implements the `command` function type.
+ *
+ * @param Config The configuration object.
+ * @param Arg The pointer argument to the value to store.
+ */
+internal void
+SetCutoff(config *__restrict__ Config, char *__restrict__ Arg)
+{
+    char *End;
+    Config->Cutoff = strtof(Arg, &End);
+    if (Config->Cutoff <= 0.0f)
+    {
+        INSTANT_WRITE("Se esperaba un número positivo, lo cual no se leyó.\n");
+        Config->Cutoff = 0.0f;
+    }
+}
+
+/**
  * Prints the state of the execution configuration.
  * Implements the `command` function type.
  *
@@ -340,6 +361,8 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
     r64 Timings[Config->Executions] = {};
     u64 TimingsRdtsc[Config->Executions] = {};
     u64 Iterations[Config->Executions] = {};
+    r32 Cutoff = Config->Cutoff;
+    r32 HitPercent = 0.0f;
 
     for (u64 Execution = 0; Execution < Config->Executions; Execution++)
     {
@@ -348,7 +371,8 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
 
         b32 Ok;
         MEASURE_TIME(Time,
-            Ok = Config->Solver.Solve(ProblemCopy, Route, Iterations+Execution);
+            Ok = Config->Solver.Solve(ProblemCopy, Route, Iterations+Execution,
+                    Cutoff);
         );
         Timings[Execution] = fsecs_Time;
         TimingsRdtsc[Execution] = rdtsc_Time;
@@ -397,6 +421,10 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
 
         // Store stats
         SolutionCosts[Execution] = RouteCost;
+        if (RouteCost <= Cutoff)
+        {
+            HitPercent += 1.0f;
+        }
 
         // Set best if this is it
         if (RouteCost < BestValue)
@@ -406,6 +434,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
             memcpy(BestRoute, Route, sizeof(i32)*Config->Tsp->N);
         }
     }
+    HitPercent /= Config->Executions;
 
     report_data ReportData = {};
     ReportData.Problem = Config->Name;
@@ -419,6 +448,8 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
     ReportData.BestCostIdx = BestIdx;
     ReportData.N = Config->Tsp->N;
     ReportData.Execs = Config->Executions;
+    ReportData.HitPercent = HitPercent;
+    ReportData.Cutoff = Cutoff;
 
     // Create the report
     char Report[ReportToStr(&ReportData, 0)];
@@ -449,7 +480,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
 }
 
 // Number of commands
-#define CMD_COUNT 8
+#define CMD_COUNT 9
 
 // List of command names
 global_variable const char *COMMAND_NAMES[CMD_COUNT] = {
@@ -458,6 +489,7 @@ global_variable const char *COMMAND_NAMES[CMD_COUNT] = {
     "solver",
     "iterations",
     "executions",
+    "cutoff",
     "config",
     "exit",
     "run"
@@ -470,6 +502,7 @@ global_variable const size_t COMMAND_NAME_LENS[CMD_COUNT] = {
     size_t(strlen("solver")),
     size_t(strlen("iterations")),
     size_t(strlen("executons")),
+    size_t(strlen("cutoff")),
     size_t(strlen("config")),
     size_t(strlen("exit")),
     size_t(strlen("run"))
@@ -482,6 +515,7 @@ global_variable const command *COMMANDS[CMD_COUNT] = {
     LoadSolver,
     SetIterations,
     SetExecutions,
+    SetCutoff,
     PrintConfig,
     Exit,
     Run

@@ -55,10 +55,14 @@ solver_Unload();
  * @param Iterations Pointer to the number of iterations to run the solver,
  *                   which should be written back to with the number of
  *                   iterations actually executed.
+ * @param Cutoff The minimum cost deemed as a good solution. If a solution with
+ *               this value or less is found, the solver HAS to terminate and
+ *               return it.
  * 
  * @return 1 if everything went ok.
  */
 extern "C" EXPORT b32
 solver_Solve(tsp_instance *__restrict__ Tsp,
              i32 *__restrict__ out_Permutation,
-             u64 *__restrict__ Iterations);
+             u64 *__restrict__ Iterations,
+             r32 Cutoff);
