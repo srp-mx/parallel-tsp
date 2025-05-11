@@ -76,18 +76,18 @@ solver_Setup()
 
     if (Err != cudaSuccess)
     {
-        write(1, ERR_DEVCNT, sizeof(ERR_DEVCNT));
+        IGNORE_RESULT(write(1, ERR_DEVCNT, sizeof(ERR_DEVCNT)));
         return 0;
     }
 
     if (DeviceCount == 0)
     {
-        write(1, ERR_NOCUDA, sizeof(ERR_NOCUDA));
+        IGNORE_RESULT(write(1, ERR_NOCUDA, sizeof(ERR_NOCUDA)));
         return 0;
     }
     else if (DeviceCount > 1)
     {
-        write(1, WARN_EXTRAGPUS, sizeof(WARN_EXTRAGPUS));
+        IGNORE_RESULT(write(1, WARN_EXTRAGPUS, sizeof(WARN_EXTRAGPUS)));
         return 0;
     }
 

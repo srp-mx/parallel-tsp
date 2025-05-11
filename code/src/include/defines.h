@@ -7,6 +7,8 @@
 #define global_variable static
 #define local_persist static
 
+#define IGNORE_RESULT(expr) do { if (expr) {} } while (0)
+
 typedef uint8_t u8; static_assert(sizeof(u8) == 1, "u8 not 1 byte");
 typedef uint16_t u16; static_assert(sizeof(u16) == 2, "u16 not 2 bytes");
 typedef uint32_t u32; static_assert(sizeof(u32) == 4, "u32 not 4 bytes");

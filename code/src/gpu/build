@@ -4,19 +4,19 @@ name="gpu"
 build_dir="../../bin/${name}/"
 this_dir="$(pwd)"
 
-extensions="-g"
-optimizations="-O0"
+extensions="-msse -mavx -march=native"
+optimizations="-O3 -ftree-vectorize"
 libs="-lm"
-warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
+warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch -fdiagnostics-show-option"
 stripping="-fno-rtti -fno-exceptions"
 includes="-I../../src/include"
-defs=""
+defs="-DMUTATION_CHANCE=0.5f -DACCEPT_WORSE_CHANCE=0.05f"
 
 xlinker="$libs"
 xcompiler="-fPIC $extensions $optimizations $warns $stripping $defs $includes"
 cudalibs="-lcudart"
 
-cudaflags="-G -g --keep"
+cudaflags="-Xptxas -v --gpu-architecture=sm_60 --keep"
 
 if [ ! -d "$build_dir" ]; then
     mkdir -p "$build_dir"

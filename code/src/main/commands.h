@@ -401,6 +401,12 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
             {
                 INSTANT_WRITE("El solucionador dio una solución que repite "
                         "vértices.\n");
+                // TODO: DEBUG
+                for (i32 i = 0; i < Config->Tsp->N; i++)
+                {
+                    printf("%d ", Route[i]);
+                }
+                printf("\n");
                 return;
             }
             Explored[Route[I]] = 1;

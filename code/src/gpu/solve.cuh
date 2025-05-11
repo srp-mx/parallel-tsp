@@ -19,8 +19,6 @@
 
 static_assert(sizeof(v2) == sizeof(float2), "The size of float2 /= size of v2");
 
-#define MUTATION_CHANCE 0.2f
-
 __device__ inline r32
 d_Distance(float2 U, float2 V)
 {
@@ -259,7 +257,7 @@ NextGeneration(i32 N, r32 *Costs, u32 *Islands, u32 *NewIslands, u32 *Elites,
         Evaluation += Costs[NextEntry[K] + N*NextEntry[(K+1)%N]];
     }
 
-    if (Evaluation < shm_Fitness[T])
+    if (Evaluation < shm_Fitness[T] || curand_uniform(&Rng) <= ACCEPT_WORSE_CHANCE)
     {
         for (u32 K = 0; K < N; K++)
         {
@@ -302,6 +300,15 @@ NextGeneration(i32 N, r32 *Costs, u32 *Islands, u32 *NewIslands, u32 *Elites,
     Rand[I] = Rng;
 }
 
+struct ConvertBlockSizeToShmSize
+{
+    __host__ __device__ size_t
+    operator()(i32 blockSize)
+    {
+        return 6 * blockSize;
+    }
+};
+
 internal inline b32
 Main(tsp_instance *__restrict__ Tsp,
         i32 *__restrict__ out_Permutation,
@@ -309,21 +316,22 @@ Main(tsp_instance *__restrict__ Tsp,
         cudaDeviceProp *__restrict__ DevProp,
         r32 Cutoff)
 {
-    const auto SmCount = DevProp->multiProcessorCount;
-    const auto MaxSmThreads = DevProp->maxThreadsPerMultiProcessor;
     const auto MaxBlockThreads = DevProp->maxThreadsPerBlock;
     const auto ShmPerBlock = DevProp->sharedMemPerBlock;
+    const auto WarpSize = DevProp->warpSize;
 
-    // The strategy is to fill up the entire GPU's compute availability exactly
-    // a fraction of N times each kernel call to reduce kernel launch
-    // synchronization overhead.
-    const u32 Population = (max(
-            min(MaxSmThreads / SmCount, MaxBlockThreads),
-            4*DevProp->warpSize)/DevProp->warpSize)*DevProp->warpSize;
-    const u32 Islands = SmCount * ((Tsp->N+Population-1)/Population);
+    // Maximize occupancy for a net population size of at least 2N
+    u32 Population = 0;
+    u32 Islands = 0;
+    cudaOccupancyMaxPotentialBlockSizeVariableSMem(
+            (i32*)&Islands, (i32*)&Population, NextGeneration,
+            ConvertBlockSizeToShmSize());
+    Population = max(4*WarpSize, Population);
+    Islands = max(Islands, (2*Tsp->N + Population - 1)/Population);
+
     char SettingsStr[sizeof(STRFMT_SETTINGS) + 21] = {};
     size_t SettingsStrLen = sprintf(SettingsStr, STRFMT_SETTINGS, Islands, Population);
-    write(1, SettingsStr, SettingsStrLen);
+    IGNORE_RESULT(write(1, SettingsStr, SettingsStrLen));
 
     void *d_Arena;
     r32 *d_CostMtx, *d_Fitness, *d_EliteFitness;
@@ -347,18 +355,18 @@ Main(tsp_instance *__restrict__ Tsp,
         + d_RandSz + d_BitsetsSz;
     char MemUseStr[sizeof(STRFMT_GLOBUSE) + 21] = {};
     size_t MemUseStrLen = sprintf(MemUseStr, STRFMT_GLOBUSE, ArenaSize);
-    write(1, MemUseStr, MemUseStrLen);
+    IGNORE_RESULT(write(1, MemUseStr, MemUseStrLen));
 
     if (ArenaSize > DevProp->totalGlobalMem)
     {
-        write(1, ERR_NOMEM, sizeof(ERR_NOMEM));
+        IGNORE_RESULT(write(1, ERR_NOMEM, sizeof(ERR_NOMEM)));
         return 0;
     }
 
     cudaError_t Err = cudaMalloc(&d_Arena, ArenaSize);
     if (Err != cudaSuccess)
     {
-        write(1, ERR_NOMEM, sizeof(ERR_NOMEM));
+        IGNORE_RESULT(write(1, ERR_NOMEM, sizeof(ERR_NOMEM)));
         return 0;
     }
 
@@ -390,12 +398,12 @@ Main(tsp_instance *__restrict__ Tsp,
     cudaDeviceSynchronize();
     if ((Err = cudaGetLastError()) != cudaSuccess)
     {
-        write(1, ERR_COSTKERN, sizeof(ERR_COSTKERN));
+        IGNORE_RESULT(write(1, ERR_COSTKERN, sizeof(ERR_COSTKERN)));
         cudaFree(d_Arena);
         return 0;
     }
 
-    u32 ShmSize = 6*Population;
+    u32 ShmSize = ConvertBlockSizeToShmSize()(Population);
     InitPopulation<<<Islands,Population,ShmSize>>>(Tsp->N, d_CostMtx,
             d_IslandsA, d_EliteIsland, d_Fitness, d_EliteFitness, d_Rand,
             __rdtsc());
@@ -403,7 +411,7 @@ Main(tsp_instance *__restrict__ Tsp,
     cudaDeviceSynchronize();
     if ((Err = cudaGetLastError()) != cudaSuccess)
     {
-        write(1, ERR_INITPOP, sizeof(ERR_INITPOP));
+        IGNORE_RESULT(write(1, ERR_INITPOP, sizeof(ERR_INITPOP)));
         cudaFree(d_Arena);
         return 0;
     }
@@ -437,11 +445,11 @@ Main(tsp_instance *__restrict__ Tsp,
 
     if (BestFit <= Cutoff)
     {
-        write(1, OK_CUTOFF, sizeof(OK_CUTOFF));
+        IGNORE_RESULT(write(1, OK_CUTOFF, sizeof(OK_CUTOFF)));
     }
     else
     {
-        write(1, OK_EFFORT, sizeof(OK_EFFORT));
+        IGNORE_RESULT(write(1, OK_EFFORT, sizeof(OK_EFFORT)));
     }
 
     *Iterations = I;
