@@ -13,18 +13,18 @@ includes="-I../../src/include"
 defs=""
 
 xlinker="$libs"
-xcompiler="-fPIC $extensions $optimizations $warns $stripping $defs"
+xcompiler="-fPIC $extensions $optimizations $warns $stripping $defs $includes"
 cudalibs="-lcudart"
 
-cudaflags="-G -g --keep -Xcompiler=\"$xcompiler\""
+cudaflags="-G -g --keep"
 
 if [ ! -d "$build_dir" ]; then
     mkdir -p "$build_dir"
 fi
 
 pushd "$build_dir" 1>> /dev/null
-    nvcc $cudaflags -ccbin "g++" -dc "${this_dir}/${name}.cu" -o "${name}.o" && \
-    nvcc $cudaflags -ccbin "g++" -shared -o "${name}.so" "${name}.o" $cudalibs -Xlinker "$xlinker" && \
+    nvcc $cudaflags -ccbin "g++" -Xcompiler "$xcompiler" -dc "${this_dir}/${name}.cu" -o "${name}.o" && \
+    nvcc $cudaflags -ccbin "g++" -Xcompiler "$xcompiler" -shared -o "${name}.so" "${name}.o" $cudalibs -Xlinker "$xlinker" && \
     cp "${name}.so" ../../data/
 popd 1>> /dev/null
 
