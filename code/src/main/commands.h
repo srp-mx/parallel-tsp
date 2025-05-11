@@ -364,6 +364,11 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
     r32 Cutoff = Config->Cutoff;
     r32 HitPercent = 0.0f;
 
+    for (u64 I = 0; I < Config->Executions; I++)
+    {
+        Iterations[I] = Config->Iterations;
+    }
+
     for (u64 Execution = 0; Execution < Config->Executions; Execution++)
     {
         memcpy(ProblemCopy, Config->Tsp, ProblemBytes);
@@ -389,12 +394,12 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
         {
             if (Route[I] < 0 || Route[I] >= Config->Tsp->N)
             {
-                INSTANT_WRITE("El solucionador dió un índice fuera de rango.\n");
+                INSTANT_WRITE("El solucionador dio un índice fuera de rango.\n");
                 return;
             }
             if (Explored[Route[I]])
             {
-                INSTANT_WRITE("El solucionador dió una solución que repite "
+                INSTANT_WRITE("El solucionador dio una solución que repite "
                         "vértices.\n");
                 return;
             }
@@ -404,7 +409,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
         {
             if (!Explored[Route[I]])
             {
-                INSTANT_WRITE("El solucionador dió una solución que no pasa "
+                INSTANT_WRITE("El solucionador dio una solución que no pasa "
                         "por todos los vértices.\n");
                 return;
             }
