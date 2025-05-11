@@ -419,8 +419,8 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
         r32 RouteCost = 0.0f;
         for (i32 I = 0; I < Config->Tsp->N; I++)
         {
-            v2 U = Config->Tsp->Coords[I];
-            v2 V = Config->Tsp->Coords[(I+1)%Config->Tsp->N];
+            v2 U = Config->Tsp->Coords[Route[I]];
+            v2 V = Config->Tsp->Coords[Route[(I+1)%Config->Tsp->N]];
             RouteCost += Dist(U, V);
         }
 
