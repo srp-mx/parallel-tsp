@@ -271,19 +271,20 @@ NextGeneration(i32 N, r32 *Costs, u32 *Islands, u32 *NewIslands, u32 *Elites,
 
     for (i32 Stride = Population >> 1; Stride > 0; Stride >>= 1)
     {
-        if (T < Stride)
+        if (T < Stride && shm_Fitness[T] > shm_Fitness[T+Stride])
         {
-            if (shm_Fitness[T] > shm_Fitness[T+Stride])
-            {
-                shm_Fitness[T] = shm_Fitness[T+Stride];
-                shm_Indices[T] = shm_Indices[T+Stride];
-            }
+            shm_Fitness[T] = shm_Fitness[T+Stride];
+            shm_Indices[T] = shm_Indices[T+Stride];
         }
         __syncthreads();
     }
 
+    if (T == 0)
+    {
+        shm_Fitness[1] = EliteFitness[B];
+    }
     __syncthreads();
-    if (shm_Fitness[0] < EliteFitness[B])
+    if (shm_Fitness[0] < shm_Fitness[1])
     {
         u32 *Best = Islands + N*(shm_Indices[0] + B*Population);
         for (i32 J = T; J < N; J += Population)
