@@ -1,0 +1,28 @@
+#!/usr/bin/bash
+
+solver="$1"
+here="$(pwd)"
+experiments="experiments.py"
+
+if [[ -z "$solver" ]] ; then
+    echo "Missed which solver to use"
+    exit 2
+fi
+
+pushd ../code/data/ 1>> /dev/null
+    ls -la
+
+    if [[ ! -f ./main ]] ; then
+        echo "You forgot to include the main executable"
+        exit 2
+    fi
+    if [[ ! -f ./${solver}.so ]] ; then
+        echo "There is no such solver: $solver"
+        echo "You may have forgotten to compile it"
+        exit 2
+    fi
+
+    rm logs/*
+    "${here}/${experiments}" "$solver"
+    cp logs/* "${here}/data"
+popd 1>> /dev/null
