@@ -43,10 +43,23 @@ CrearPoblacion(i32 N, i32 P)
     return Poblacion;
 }
 
-i32
-Aptitud(i32 *Individuo, v2 Coords[])
+r32
+Distancia(i32 Ciudad1, i32 Ciudad2, v2 Coords[])
 {
+    r32 Dx = Coords[Ciudad1].X - Coords[Ciudad2].X;
+    r32 Dy = Coords[Ciudad1].Y - Coords[Ciudad2].Y;
+    return sqrtf(Dx*Dx + Dy*Dy);
+}
 
+i32
+Aptitud(i32 N, i32 Individuo[], v2 Coords[])
+{
+    r32 Acc = 0.0f;
+    for(i32 I = 0; I < N; I++)
+    {
+        Acc += Distancia(Individuo[I], Individuo[(I+1) % N], Coords);
+    }
+    return (i32)Acc;
 }
 
 void
@@ -69,25 +82,13 @@ Main(tsp_instance *__restrict__ Tsp,
     i32 *Puntuaciones = (i32*)malloc(sizeof(i32) * N);
     for (i32 I = 0; I < N; I++)
     {
-        Puntuaciones[I] = Aptitud(Poblacion[I], Tsp->Coords);
+        Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
     }
     return 1;
 }
 
 /**
- * Tsp->Coords[u]
-0 <= u < Tsp->N
-dx = coordA.X - coordB.X
-dy = coordA.Y - coordB.Y
-dist = sqrtf(dx*dx + dy*dy)
-
-acc = 0.0f;
-for(i = 0; i < n; i++)
-{
-acc += dist(tu_perm[i], tu_perm[(i+1)%n])
-}
-
-
+ * 
 100 200 300
 1/6 2/6 3/6
 5/6 4/6 3/6
@@ -123,13 +124,4 @@ solver cpuseq
 b Run
 [tsp]$ run
 solve_Solve()
-
-
-for (i32 Right = N-1; Right > 0; Right--)
-    {
-        i32 Left = curand(&Rng) % (Right + 1);
-        i32 Tmp = Entry[Left];
-        Entry[Left] = Entry[Right];
-        Entry[Right] = Tmp;
-    }
  */
