@@ -209,7 +209,7 @@ Main(tsp_instance *__restrict__ Tsp,
 
     // Creamos arreglos auxiliares para guardar la generación actual y la anterior.
     // o en este caso la generación anterior y la nueva.
-    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32)*2*N);
+    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32*)*2*N);
     r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
 
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
