@@ -59,7 +59,7 @@ solver_Name()
 const char *
 solver_Description()
 {
-    return "Closely follows the elite island model from the paper at\n"
+    return "Closely follows the elite island model from the paper at "
         "http://difu100cia.uaz.edu.mx/index.php/difuciencia/article/view/145";
 }
 
@@ -107,10 +107,11 @@ solver_Unload() {}
  * Executes the euclidean TSP solver.
  *
  * @param Tsp A pointer to the TSP instance to be read from.
- * @param out_Permutation An array with N spaces, to be 0 through N-1.
- * @param Iterations A single iteration will be executed, so it will write 1.
+ * @param out_Permutation An array to be filled in with the best solution.
+ * @param Iterations Has the maximum number of iterations and the ones executed
+ *                   are written back into it.
  * 
- * @return 1 (everything ok).
+ * @return 1 if everything is ok, or 0 otherwise.
  */
 b32
 solver_Solve(tsp_instance *__restrict__ Tsp,
