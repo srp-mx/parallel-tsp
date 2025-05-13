@@ -8,11 +8,6 @@
 #include <malloc.h>
 #include <bits/stdc++.h>
 
-/**
- * 4.Realizar la recombinación entre los cromosomas padres.
- * 5.Aplicar mutación.
- */
-
 i32**
 CrearPoblacion(i32 N, i32 P)
 {
@@ -74,14 +69,24 @@ ConsigueMejor(r32 Puntuaciones[], i32 Len)
     return posicion;
 }
 
-i32*
+i32
 Torneo(r32 Puntuaciones[], i32 Len)
-{}
+{
+    i32 Random1 = rand() % Len;
+    i32 Random2 = rand() % Len;
+    i32 Random3 = rand() % Len;
+    i32 Random4 = rand() % Len;
+    i32 Random5 = rand() % Len;
+    i32 Pos[] = {Random1, Random2, Random3, Random4, Random5};
+    r32 Arr[] = {Puntuaciones[Random1], Puntuaciones[Random2], Puntuaciones[Random3], Puntuaciones[Random4], Puntuaciones[Random5]};
+    return Pos[ConsigueMejor(Arr, 5)];
+}
 
 i32*
 Recombina(i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
 {
     //Combinamos a los padres.
+    // TODO: combinacion de soluciones
     i32* Solucion = 0;
     // Aplicamos mutación.
     if (((r32)rand() / (RAND_MAX)) <= Mutacion)
@@ -116,7 +121,7 @@ Main(tsp_instance *__restrict__ Tsp,
         for (i32 J = 0; J < N; J++)
         {
             i32 *Padre1 = Poblacion[J];
-            i32 *Padre2 = Poblacion[(Puntuaciones, 2*N)];
+            i32 *Padre2 = Poblacion[Torneo(Puntuaciones, 2*N)];
             NuevaGeneracion[J] = Recombina(Padre1, Padre2, 0.5f, N);
         }
         out_Permutation = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
