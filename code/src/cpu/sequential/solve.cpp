@@ -201,7 +201,7 @@ Main(tsp_instance *__restrict__ Tsp,
     // Creamos una población inicial aleatoria y la evaluamos.
     i32 N = Tsp->N;
     i32 **Poblacion = CrearPoblacion(N, 2*N);
-    r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * N);
+    r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
     for (i32 I = 0; I < N; I++)
     {
         Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
@@ -210,7 +210,7 @@ Main(tsp_instance *__restrict__ Tsp,
     // Creamos arreglos auxiliares para guardar la generación actual y la anterior.
     // o en este caso la generación anterior y la nueva.
     i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32)*2*N);
-    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * N);
+    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
 
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
     for (u64 I = 0; I < *Iterations; I++)
@@ -229,7 +229,7 @@ Main(tsp_instance *__restrict__ Tsp,
             NuevasPuntuaciones[K] = Aptitud(N, NuevaGeneracion[K], Tsp->Coords);
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
-        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
+        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, 2 * N)];
         memcpy(out_Permutation,Sol,sizeof(i32)*N);
         // La nueva generación se vuelve la generación anterior para la siguiente iteración.
         Poblacion = NuevaGeneracion;
