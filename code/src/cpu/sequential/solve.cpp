@@ -202,7 +202,7 @@ Main(tsp_instance *__restrict__ Tsp,
     i32 N = Tsp->N;
     i32 **Poblacion = CrearPoblacion(N, 2*N);
     r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
-    for (i32 I = 0; I < N; I++)
+    for (i32 I = 0; I < 2 * N; I++)
     {
         Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
     }
