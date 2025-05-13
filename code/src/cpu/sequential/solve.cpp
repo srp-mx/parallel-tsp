@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include <vector>
@@ -228,7 +229,8 @@ Main(tsp_instance *__restrict__ Tsp,
             NuevasPuntuaciones[K] = Aptitud(N, Poblacion[K], Tsp->Coords);
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
-        out_Permutation = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
+        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
+        memcpy(out_Permutation,Sol,sizeof(i32)*N);
         // La nueva generación se vuelve la generación anterior para la siguiente iteración.
         Poblacion = NuevaGeneracion;
         Puntuaciones = NuevasPuntuaciones;
