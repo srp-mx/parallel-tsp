@@ -217,14 +217,14 @@ Main(tsp_instance *__restrict__ Tsp,
     {
         // Para cada elemento de la población elegimos 2 padres. Su posición de
         // generación anterior y el ganador de un torneo entre 5 elecciones aleatorias.
-        for (i32 J = 0; J < N; J++)
+        for (i32 J = 0; J < 2 * N; J++)
         {
             i32 *Padre1 = Poblacion[J];
             i32 *Padre2 = Poblacion[Torneo(Puntuaciones, 2*N)];
             NuevaGeneracion[J] = Recombina(Padre1, Padre2, 0.5f, N);
         }
         // Evaluamos la población recién generada.
-        for (i32 K = 0; K < N; K++)
+        for (i32 K = 0; K < 2 * N; K++)
         {
             NuevasPuntuaciones[K] = Aptitud(N, NuevaGeneracion[K], Tsp->Coords);
         }
