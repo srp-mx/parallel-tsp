@@ -200,40 +200,41 @@ Main(tsp_instance *__restrict__ Tsp,
 {
     // Creamos una población inicial aleatoria y la evaluamos.
     i32 N = Tsp->N;
-    i32 **Poblacion = CrearPoblacion(N, 2*N);
-    r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
-    for (i32 I = 0; I < 2 * N; I++)
+    i32 TamPoblacion = std::max(2*N, 1000);
+    i32 **Poblacion = CrearPoblacion(N, TamPoblacion);
+    r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * TamPoblacion);
+    for (i32 I = 0; I < TamPoblacion; I++)
     {
         Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
     }
 
     // Creamos arreglos auxiliares para guardar la generación actual y la anterior.
     // o en este caso la generación anterior y la nueva.
-    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32*)*2*N);
-    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * 2 * N);
+    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32*)*TamPoblacion);
+    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * TamPoblacion);
 
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
     for (u64 I = 0; I < *Iterations; I++)
     {
         // Para cada elemento de la población elegimos 2 padres. Su posición de
         // generación anterior y el ganador de un torneo entre 5 elecciones aleatorias.
-        for (i32 J = 0; J < 2 * N; J++)
+        for (i32 J = 0; J < TamPoblacion; J++)
         {
             i32 *Padre1 = Poblacion[J];
-            i32 *Padre2 = Poblacion[Torneo(Puntuaciones, 2*N)];
+            i32 *Padre2 = Poblacion[Torneo(Puntuaciones, TamPoblacion)];
             NuevaGeneracion[J] = Recombina(Padre1, Padre2, 0.5f, N);
         }
         // Evaluamos la población recién generada.
-        for (i32 K = 0; K < 2 * N; K++)
+        for (i32 K = 0; K < TamPoblacion; K++)
         {
             NuevasPuntuaciones[K] = Aptitud(N, NuevaGeneracion[K], Tsp->Coords);
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
-        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, 2 * N)];
+        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, TamPoblacion)];
         memcpy(out_Permutation,Sol,sizeof(i32)*N);
         // La nueva generación se vuelve la generación anterior para la siguiente iteración.
-        memcpy(Poblacion,NuevaGeneracion,sizeof(i32*)*2*N);
-        memcpy(Puntuaciones,NuevasPuntuaciones,sizeof(r32)*2*N);
+        memcpy(Poblacion,NuevaGeneracion,sizeof(i32*)*TamPoblacion);
+        memcpy(Puntuaciones,NuevasPuntuaciones,sizeof(r32)*TamPoblacion);
         // Revisamos que la solución con mejor puntaje al momento sea suficiente.
         if(Aptitud(N, out_Permutation, Tsp->Coords) <= Cutoff)
         {
