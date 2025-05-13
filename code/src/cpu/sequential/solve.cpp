@@ -9,13 +9,8 @@
 #include <bits/stdc++.h>
 
 /**
- * 1.Crear una población inicial de tamaño n.
- * 2.Calcular el valor de aptitud para cada individuo.
- * 3.Seleccionar un subconjunto de soluciones candidatas para formar parte del
- * conjunto de apareamiento.
  * 4.Realizar la recombinación entre los cromosomas padres.
  * 5.Aplicar mutación.
- * 6.Repetir hasta generar el número de generaciones establecidas
  */
 
 i32**
@@ -51,7 +46,7 @@ Distancia(i32 Ciudad1, i32 Ciudad2, v2 Coords[])
     return sqrtf(Dx*Dx + Dy*Dy);
 }
 
-i32
+r32
 Aptitud(i32 N, i32 Individuo[], v2 Coords[])
 {
     r32 Acc = 0.0f;
@@ -59,17 +54,45 @@ Aptitud(i32 N, i32 Individuo[], v2 Coords[])
     {
         Acc += Distancia(Individuo[I], Individuo[(I+1) % N], Coords);
     }
-    return (i32)Acc;
+    return Acc;
 }
 
-void
-SeleccionaPadres() {}
+i32
+ConsigueMejor(r32 Puntuaciones[], i32 Len)
+{
+    i32 menor = Puntuaciones[0];
+    i32 posicion = 0;
+    for (i32 I = 1; I < Len; I++)
+    {
+        if (Puntuaciones[I] < menor)
+        {
+            menor = Puntuaciones[I];
+            posicion = I;
+        }
+        
+    }
+    return posicion;
+}
 
-void
-Recombina() {}
+i32*
+Torneo(r32 Puntuaciones[], i32 Len)
+{}
 
-void
-Mutacion() {}
+i32*
+Recombina(i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
+{
+    //Combinamos a los padres.
+    i32* Solucion = 0;
+    // Aplicamos mutación.
+    if (((r32)rand() / (RAND_MAX)) <= Mutacion)
+    {
+        i32 Random1 = rand() % N;
+        i32 Temp = Solucion[Random1];
+        i32 Random2 = rand() % N;
+        Solucion[Random1] = Solucion[Random2];
+        Solucion[Random2] = Temp;
+    }
+}
 
 b32
 Main(tsp_instance *__restrict__ Tsp,
@@ -79,10 +102,32 @@ Main(tsp_instance *__restrict__ Tsp,
 {
     i32 N = Tsp->N;
     i32 **Poblacion = CrearPoblacion(N, 2*N);
-    i32 *Puntuaciones = (i32*)malloc(sizeof(i32) * N);
+    r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * N);
     for (i32 I = 0; I < N; I++)
     {
         Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
+    }
+
+    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32)*2*N*N);
+    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * N);
+
+    for (u64 I = 0; I < *Iterations; I++)
+    {
+        for (i32 J = 0; J < N; J++)
+        {
+            i32 *Padre1 = Poblacion[J];
+            i32 *Padre2 = Poblacion[(Puntuaciones, 2*N)];
+            NuevaGeneracion[J] = Recombina(Padre1, Padre2, 0.5f, N);
+        }
+        out_Permutation = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
+        Poblacion = NuevaGeneracion;
+        Puntuaciones = NuevasPuntuaciones;
+        // Revisamos que la solución con mejor puntaje al momento sea suficiente.
+        if(Aptitud(N, out_Permutation, Tsp->Coords) <= Cutoff)
+        {
+            *Iterations = I;
+            break;
+        }
     }
     return 1;
 }
@@ -103,25 +148,28 @@ Main(tsp_instance *__restrict__ Tsp,
 0.34-1/6 mas o menos 0.16
 
 
-Poblacion[i]
-Poblacion[j]
-u32 Poblacion[P][N] = {};
-
-
-u32 PoblacionNueva[P][N] = {};
-for (i = 0; i < N; i++)
-{
-
-}
-Padre1 = Poblacion[i]
-
-
-Padre2 = Poblacion[torneo()]
-
-
 code/data/main
 solver cpuseq
 b Run
 [tsp]$ run
 solve_Solve()
+
+
+
+
+bool repetido = false;
+i32 random = rand() % N;
+for (i32 k = 0; k < j; k++)
+{
+    if (random == arr[k])
+    {
+        repetido = true;
+        break;
+    }
+}
+if (!repetido)
+{
+    arr[j] = random;
+    j++;
+}
  */
