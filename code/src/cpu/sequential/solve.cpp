@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <vector>
+#include <immintrin.h>
 
 /**
  * Crea una población aleatoria de P soluciones de tamaño N.
@@ -198,6 +199,9 @@ Main(tsp_instance *__restrict__ Tsp,
         u64 *__restrict__ Iterations,
         r32 Cutoff) 
 {
+    // Agregamos semilla arbitraria al generador de números aleatorios
+    srand(__rdtsc());
+
     // Creamos una población inicial aleatoria y la evaluamos.
     i32 N = Tsp->N;
     i32 TamPoblacion = std::max(2*N, 1000);
