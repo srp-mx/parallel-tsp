@@ -232,8 +232,8 @@ Main(tsp_instance *__restrict__ Tsp,
         i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, 2 * N)];
         memcpy(out_Permutation,Sol,sizeof(i32)*N);
         // La nueva generación se vuelve la generación anterior para la siguiente iteración.
-        Poblacion = NuevaGeneracion;
-        Puntuaciones = NuevasPuntuaciones;
+        memcpy(Poblacion,NuevaGeneracion,sizeof(i32*)*2*N);
+        memcpy(Puntuaciones,NuevasPuntuaciones,sizeof(r32)*2*N);
         // Revisamos que la solución con mejor puntaje al momento sea suficiente.
         if(Aptitud(N, out_Permutation, Tsp->Coords) <= Cutoff)
         {
