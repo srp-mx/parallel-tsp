@@ -6,7 +6,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <bits/stdc++.h>
+#include <stdlib.h>
+#include <math.h>
 #include <vector>
 
 /**
