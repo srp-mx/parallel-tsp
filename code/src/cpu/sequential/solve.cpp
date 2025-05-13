@@ -92,7 +92,7 @@ Aptitud(i32 N, i32 Individuo[], v2 Coords[])
 i32
 ConsigueMejor(r32 Puntuaciones[], i32 Len)
 {
-    i32 menor = Puntuaciones[0];
+    r32 menor = Puntuaciones[0];
     i32 posicion = 0;
     for (i32 I = 1; I < Len; I++)
     {
@@ -209,7 +209,7 @@ Main(tsp_instance *__restrict__ Tsp,
 
     // Creamos arreglos auxiliares para guardar la generación actual y la anterior.
     // o en este caso la generación anterior y la nueva.
-    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32)*2*N*N);
+    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32)*2*N);
     r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * N);
 
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
@@ -226,7 +226,7 @@ Main(tsp_instance *__restrict__ Tsp,
         // Evaluamos la población recién generada.
         for (i32 K = 0; K < N; K++)
         {
-            NuevasPuntuaciones[K] = Aptitud(N, Poblacion[K], Tsp->Coords);
+            NuevasPuntuaciones[K] = Aptitud(N, NuevaGeneracion[K], Tsp->Coords);
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
         i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, N)];
