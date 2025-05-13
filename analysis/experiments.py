@@ -16,8 +16,6 @@ selected_problems = [
     "d657",
     "rat783",
     "pcb1173",
-    "fl1577",
-    "usa13509",
 ]
 cutoff_percent = lambda prob_size : 1 + (0.01 * round(1+log10(prob_size)**2))
 executions = 50
@@ -187,19 +185,33 @@ dimensions = {
 }
 
 solver = sys.argv[1]
-process = subprocess.Popen("./main", stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+process = subprocess.Popen("./main",
+                           stdin=subprocess.PIPE,
+                           stdout=subprocess.PIPE,
+                           text=True,
+                           bufsize=1,
+                           universal_newlines=True)
 
 def send(text):
     process.stdin.write(text + '\n')
     process.stdin.flush()
 
 def finish():
-    output, _ = process.communicate()
-    print(output)
+    process.stdin.close()
+    output_lines = []
+    while True:
+        line = process.stdout.readline()
+        if not line:
+            break
+        print(line,end="")
+        output_lines.append(line)
+    process.stdout.close()
+    process.wait()
+
     dt = datetime.now()
     dtstr = dt.strftime("%Y-%m-%dT%H_%M_%S")
     with open("experiments/experiments_stdout_" + dtstr + ".txt", "w") as file:
-        file.write(output)
+        file.write("".join(output_lines))
 
 
 send("solver " + solver)
