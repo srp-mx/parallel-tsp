@@ -12,10 +12,10 @@ selected_problems = [
     "kroB100",
     "lin105",
     "tsp225",
-    "pcb442",
-    "d657",
-    "rat783",
-    "pcb1173",
+    # "pcb442",
+    # "d657",
+    # "rat783",
+    # "pcb1173",
 ]
 cutoff_percent = lambda prob_size : 1 + (0.01 * round(1+log10(prob_size)**2))
 executions = 30
