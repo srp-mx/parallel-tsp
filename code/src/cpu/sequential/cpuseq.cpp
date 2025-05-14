@@ -88,5 +88,7 @@ solver_Solve(tsp_instance *__restrict__ Tsp,
              u64 *__restrict__ Iterations,
              r32 Cutoff)
 {
-    return Main(Tsp, out_Permutation, Iterations, Cutoff);
+    b32 resultado = Main(Tsp, out_Permutation, Iterations, Cutoff);
+    IGNORE_RESULT(write(1, "Listo\n", 6));
+    return resultado;
 }

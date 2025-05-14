@@ -18,8 +18,8 @@ selected_problems = [
     "pcb1173",
 ]
 cutoff_percent = lambda prob_size : 1 + (0.01 * round(1+log10(prob_size)**2))
-executions = 50
-max_iterations = 80_000
+executions = 30
+max_iterations = 6000
 
 # Information on some problems
 
