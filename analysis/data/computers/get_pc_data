@@ -1,0 +1,101 @@
+#!/bin/bash
+#
+# This script sets up a Python virtual environment,
+# installs required Python modules (psutil, py-cpuinfo, pynvml, pycuda),
+# checks for system tools like dmidecode and nvcc,
+# warns about missing dependencies and sudo privileges,
+# and then launches the Python program (program.py).
+#
+# Note: Some commands (e.g., dmidecode) may require sudo privileges.
+#       PyCUDA is considered optional; if it fails to build, GPU metrics may be limited.
+
+set -e  # Exit immediately if a command (other than PyCUDA install) fails
+
+# Detect the Linux distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    DISTRO=$ID
+else
+    echo "Error: Unable to determine Linux distribution."
+    exit 1
+fi
+
+echo "Detected OS: $DISTRO"
+echo "Installing dmidecode..."
+
+# Install dmidecode based on the distribution
+case "$DISTRO" in
+    arch)
+        sudo pacman -Sy --noconfirm dmidecode
+        ;;
+    debian | ubuntu)
+        sudo apt update && sudo apt install -y dmidecode
+        ;;
+    fedora)
+        sudo dnf install -y dmidecode
+        ;;
+    *)
+        echo "Error: Unsupported Linux distribution '$DISTRO'."
+        exit 1
+        ;;
+esac
+
+echo "dmidecode installation completed!"
+
+# Check for python3 availability.
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Error: python3 is required but not installed. Exiting."
+    exit 1
+fi
+
+# Create a virtual environment if not already present.
+if [ ! -d "venv" ]; then
+    echo "Creating Python virtual environment..."
+    python3 -m venv venv || { echo "Error: Failed to create virtual environment."; exit 1; }
+fi
+
+# Activate the virtual environment.
+source venv/bin/activate
+
+# List of required Python modules.
+REQUIRED_MODULES=("psutil" "py-cpuinfo" "pynvml" "pycuda")
+
+echo "Checking for required Python modules..."
+for MODULE in "${REQUIRED_MODULES[@]}"; do
+    if ! pip show "$MODULE" >/dev/null 2>&1; then
+        echo "Module '$MODULE' is not installed. Installing..."
+        if ! pip install "$MODULE"; then
+            if [ "$MODULE" == "pycuda" ]; then
+                echo "Warning: Failed to install '$MODULE'. PyCUDA is optional; GPU metrics may be limited."
+            else
+                echo "Error: Failed to install module '$MODULE'. Exiting."
+                exit 1
+            fi
+        fi
+    fi
+done
+
+# Check if dmidecode is installed.
+if ! command -v dmidecode >/dev/null 2>&1; then
+    echo "Warning: dmidecode is not installed. Chipset and memory details may not be available."
+fi
+
+# Check if nvcc (CUDA compiler) is available.
+if ! command -v nvcc >/dev/null 2>&1; then
+    echo "Warning: nvcc (CUDA compiler) is not installed. CUDA version information may be missing."
+fi
+
+# Check for sudo privileges.
+if sudo -n true 2>/dev/null; then
+    echo "Sudo privileges available without prompting."
+else
+    echo "Warning: Some commands require sudo privileges and may prompt for your password."
+fi
+
+# Launch the Python program.
+echo "Launching program.py..."
+python3 program.py
+
+# Deactivate the virtual environment.
+deactivate
+
