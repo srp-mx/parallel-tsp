@@ -15,6 +15,9 @@
 
 #define ERR_MALLOC "No se pudo alojar suficiente memoria.\n"
 #define NUM_ELITE 5
+#define MUTACION 0.1f
+#define PROBA_ELITISMO 0.1f
+#define PROBA_HIJO_GRATIS 0.1f
 
 /**
  * Obtiene el apuntador a un individuo de la población.
@@ -191,14 +194,22 @@ Recombina(i32 *NuevoIndividuo, i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
         }
     }
     
-    // Aplicamos mutación itercambiando dos ciudades aleatorias.
+    // Aplicamos mutación al invertir un intervalo.
     if (((r32)rand() / (RAND_MAX)) <= Mutacion)
     {
         i32 Random1 = rand() % N;
-        i32 Temp = Solucion[Random1];
         i32 Random2 = rand() % N;
-        Solucion[Random1] = Solucion[Random2];
-        Solucion[Random2] = Temp;
+        A = std::min(Random1, Random2);
+        B = std::max(Random1, Random2);
+
+        while (A < B)
+        {
+            i32 Temp = Solucion[A];
+            Solucion[A] = Solucion[B];
+            Solucion[B] = Temp;
+            A++;
+            B--;
+        }
     }
 }
 
@@ -386,22 +397,35 @@ Main(tsp_instance *__restrict__ Tsp,
         for (i32 J = 0; J < TamPoblacion; J++)
         {
             i32 *Padre1 = GetIndividuo(Poblacion, N, J);
-            i32 PosElite = rand() % NUM_ELITE;
-            i32 *PadreElite = GetIndividuo(Elite, N, PosElite);
             i32 PosPadre = Torneo(Puntuaciones, TamPoblacion);
             i32 *Padre2 = GetIndividuo(Poblacion, N, PosPadre);
-            if (PuntuacionesElite[PosElite] < Puntuaciones[PosPadre])
+            if (((r32)rand() / (RAND_MAX)) <= PROBA_ELITISMO)
             {
+                i32 PosElite = rand() % NUM_ELITE;
+                i32 *PadreElite = GetIndividuo(Elite, N, PosElite);
                 Padre2 = PadreElite;
             }
             i32 *Hijo = GetIndividuo(NuevaGeneracion, N, J);
-            Recombina(Hijo, Padre1, Padre2, 0.5f, N);
+            Recombina(Hijo, Padre1, Padre2, MUTACION, N);
         }
         // Evaluamos la población recién generada.
         for (i32 K = 0; K < TamPoblacion; K++)
         {
-            i32 *Individuo = GetIndividuo(NuevaGeneracion, N, I);
+            i32 *Individuo = GetIndividuo(NuevaGeneracion, N, K);
             NuevasPuntuaciones[K] = Aptitud(N, Individuo, Tsp->Coords);
+        }
+        // Si el padre en la misma posición de un individuo era mejor, lo pasamos
+        // a la siguiente generación con alguna probabilidad
+        for (i32 K = 0; K < TamPoblacion; K++)
+        {
+            if (Puntuaciones[K] < NuevasPuntuaciones[K]
+                    && ((r32)rand() / (RAND_MAX)) > PROBA_HIJO_GRATIS)
+            {
+                i32 *Hijo = GetIndividuo(NuevaGeneracion, N, K);
+                i32 *Padre = GetIndividuo(Poblacion, N, K);
+                memcpy(Hijo, Padre, sizeof(i32)*N);
+                NuevasPuntuaciones[K] = Puntuaciones[K];
+            }
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
         i32 *Sol = GetIndividuo(NuevaGeneracion, N,
