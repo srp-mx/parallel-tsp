@@ -7,7 +7,7 @@
 
 #include <unistd.h>
 #include <stdio.h>
-#include <malloc.h>
+#include <sys/mman.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -19,7 +19,7 @@
 #define ERR_MALLOC "No se pudo alojar suficiente memoria.\n"
 #define NUM_ELITE 5
 #define MUTACION 0.1f
-#define PROBA_ELITISMO 0.1f
+#define PROBA_ELITISMO 0.05f
 #define PROBA_HIJO_GRATIS 0.1f
 
 struct rng
@@ -433,123 +433,44 @@ Main(tsp_instance *__restrict__ Tsp,
     i32 N = Tsp->N;
     i32 TamPoblacion = std::max(2*N, 1000*MaxThreads);
 
-    // Por cada hilo, construimos un generador de números aleatorios, pues
-    // en general no son thread-safe
-    rng *Rngs = new rng[MaxThreads];
-    // Sí usamos rand (pero sólo en secciones secuenciales) por lo que damos
-    // semilla
-    srand(__rdtsc());
-    i32 *Islas = (i32*)malloc(sizeof(i32) * N*TamPoblacion*MaxThreads);
-    // Si falla malloc, termina
-    if (!Islas)
+    size_t RngLen = sizeof(rng)*MaxThreads;
+    size_t IslasLen = sizeof(i32) * N*TamPoblacion*(size_t)MaxThreads;
+    size_t PuntuacionesTLen = sizeof(r32) * TamPoblacion*(size_t)MaxThreads;
+    size_t IslasEliteLen = sizeof(i32) * NUM_ELITE*MaxThreads*(size_t)N;
+    size_t PuntuacionEliteLen = sizeof(i32) * NUM_ELITE*(size_t)MaxThreads;
+    size_t SolsPorHiloLen = sizeof(i32) * N*(size_t)MaxThreads;
+    size_t FitPorHiloLen = sizeof(r32) * MaxThreads;
+
+    size_t ArenaLen = RngLen + IslasLen +  PuntuacionesTLen +
+        IslasLen + PuntuacionesTLen + IslasEliteLen + IslasEliteLen +
+        PuntuacionEliteLen + SolsPorHiloLen + FitPorHiloLen;
+
+    void *Arena = mmap(0, ArenaLen,
+            PROT_READ | PROT_WRITE,
+            MAP_PRIVATE | MAP_ANONYMOUS,
+            -1, 0);
+
+    if (Arena == MAP_FAILED)
     {
         IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    r32 *PuntuacionesT = (r32*)malloc(sizeof(r32) * TamPoblacion*MaxThreads);
-    // Si falla malloc, termina
-    if (!PuntuacionesT)
-    {
-        free(Islas);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
         return 0;
     }
 
-    // Creamos arreglos auxiliares para guardar la generación actual y la
-    // anterior, o en este caso la generación anterior y la nueva.
-    i32 *NuevasIslas = (i32*)malloc(sizeof(i32) * N*TamPoblacion*MaxThreads);
-    if (!NuevasIslas)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    r32 *NuevasPuntuacionesT = (r32*)malloc(sizeof(r32) * TamPoblacion*MaxThreads);
-    if (!NuevasPuntuacionesT)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-
-    // Guardamos las (NUM_ELITE) por hilo mejores soluciones encontradas hasta
-    // el momento.
-    i32 *IslasElite = (i32*)malloc(sizeof(i32) * NUM_ELITE*N*MaxThreads);
-    if (!IslasElite)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        free(NuevasPuntuacionesT);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    i32 *IslasEliteNuevas = (i32*)malloc(sizeof(i32) * NUM_ELITE*N*MaxThreads);
-    if (!IslasEliteNuevas)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        free(NuevasPuntuacionesT);
-        free(IslasElite);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    r32 *PuntuacionesEliteT = (r32*)malloc(sizeof(r32) * NUM_ELITE*MaxThreads);
-    if (!PuntuacionesEliteT)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        free(NuevasPuntuacionesT);
-        free(IslasElite);
-        free(IslasEliteNuevas);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    i32 *MejoresSols = (i32*)malloc(sizeof(i32) * N*MaxThreads);
-    if (!MejoresSols)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        free(NuevasPuntuacionesT);
-        free(IslasElite);
-        free(IslasEliteNuevas);
-        free(PuntuacionesEliteT);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
-    r32 *MejoresCostos = (r32*)malloc(sizeof(i32) * MaxThreads);
-    if (!MejoresCostos)
-    {
-        free(Islas);
-        free(PuntuacionesT);
-        free(NuevasIslas);
-        free(NuevasPuntuacionesT);
-        free(IslasElite);
-        free(IslasEliteNuevas);
-        free(PuntuacionesEliteT);
-        free(MejoresSols);
-        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
-        delete[] Rngs;
-        return 0;
-    }
+    rng *Rngs = (rng *)Arena;
+    i32 *Islas = (i32*)(((u8*)Rngs) + RngLen);
+    r32 *PuntuacionesT = (r32*)(((u8*)Islas) + IslasLen);
+    i32 *NuevasIslas = (i32*)(((u8*)PuntuacionesT) + PuntuacionesTLen);
+    r32 *NuevasPuntuacionesT = (r32*)(((u8*)NuevasIslas) + IslasLen);
+    i32 *IslasElite = (i32*)(((u8*)NuevasPuntuacionesT) + PuntuacionesTLen);
+    i32 *IslasEliteNuevas = (i32*)(((u8*)IslasElite) + IslasEliteLen);
+    r32 *PuntuacionesEliteT = (r32*)(((u8*)IslasEliteNuevas) + IslasEliteLen);
+    i32 *MejoresSols = (i32*)(((u8*)PuntuacionesEliteT) + PuntuacionEliteLen);
+    r32 *MejoresCostos = (r32*)(((u8*)MejoresSols) + SolsPorHiloLen);
 
     #pragma omp parallel for
     for (i32 Idx = 0; Idx < MaxThreads; Idx++)
     {
+        new (&Rngs[Idx]) rng();
         i32 *Poblacion = GetPoblacion(Islas, TamPoblacion, N, Idx);
         rng *Rng = Rngs + Idx;
         IniciaPoblacion(Poblacion, N, TamPoblacion, Rng);
@@ -618,16 +539,7 @@ Main(tsp_instance *__restrict__ Tsp,
         RemezclaElite(N, IslasElite, PuntuacionesEliteT);
     }
 
-    free(Islas);
-    free(PuntuacionesT);
-    free(NuevasIslas);
-    free(NuevasPuntuacionesT);
-    free(IslasElite);
-    free(IslasEliteNuevas);
-    free(PuntuacionesEliteT);
-    free(MejoresSols);
-    free(MejoresCostos);
+    munmap(Arena, ArenaLen);
 
-    delete[] Rngs;
     return 1;
 }

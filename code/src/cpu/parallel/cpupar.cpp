@@ -1,9 +1,9 @@
 #include "solver.h"
 
 #include <omp.h>
-global_variable i32 MaxThreads = -1;
+global_variable i32 MaxThreads = 1;
 
-#include "solve.cpp"
+#include "solve.h"
 
 /*Copyright (C) 2025
 
@@ -94,9 +94,9 @@ solver_Solve(tsp_instance *__restrict__ Tsp,
              u64 *__restrict__ Iterations,
              r32 Cutoff)
 {
-    b32 resultado = Main(Tsp, out_Permutation, Iterations, Cutoff);
     char PrintRes[18+21] = {};
-    size_t PrintLen = sprintf(PrintRes, "Listo (%d hilos)\n", MaxThreads);
+    size_t PrintLen = sprintf(PrintRes, "Vamos (%d hilos)\n", MaxThreads);
     IGNORE_RESULT(write(1, PrintRes, PrintLen));
+    b32 resultado = Main(Tsp, out_Permutation, Iterations, Cutoff);
     return resultado;
 }
