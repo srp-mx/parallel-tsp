@@ -13,37 +13,50 @@
 #include <immintrin.h>
 #include <algorithm>
 
+#define ERR_MALLOC "No se pudo alojar suficiente memoria.\n"
+#define NUM_ELITE 5
+
+/**
+ * Obtiene el apuntador a un individuo de la población.
+ *
+ * @param N El número de ciudades.
+ * @param I El índice del individuo.
+ *
+ * @return El apuntador a la primera ciudad del individuo.
+ */
+internal inline i32*
+GetIndividuo(i32 *Poblacion, i32 N, i32 I)
+{
+    return Poblacion + I*N;
+}
+
 /**
  * Crea una población aleatoria de P soluciones de tamaño N.
  *
+ * @param Poblacion El buffer con los N*P i32 a llenar.
  * @param N Tamaño de las soluciones o individuos.
  * @param P Número de individuos de la población.
- * 
- * @return Poblacion - La población aleatoria formada.
  */
-i32**
-CrearPoblacion(i32 N, i32 P)
+internal void
+IniciaPoblacion(i32 *Poblacion, i32 N, i32 P)
 {
-    i32 **Poblacion = (i32**)malloc(sizeof(i32*) * P);
     for (i32 I = 0; I < P; I++)
     {
-        i32 *Arr = (i32*)malloc(sizeof(i32) * N);
+        i32 *Individuo = GetIndividuo(Poblacion, N, I);
         // Llenamos el arreglo con los números del 0 a N-1.
         for (i32 J = 0; J < N; J++)
         {
-            Arr[J] = J;
+            Individuo[J] = J;
         }
         // Hacemos shuffle de los números.
         for (i32 Right = N-1; Right > 0; Right--)
         {
             i32 Left = rand() % (Right + 1);
-            i32 Tmp = Arr[Left];
-            Arr[Left] = Arr[Right];
-            Arr[Right] = Tmp;
+            i32 Tmp = Individuo[Left];
+            Individuo[Left] = Individuo[Right];
+            Individuo[Right] = Tmp;
         }
-        Poblacion[I] = Arr;
     }
-    return Poblacion;
 }
 
 /**
@@ -55,7 +68,7 @@ CrearPoblacion(i32 N, i32 P)
  * 
  * @return La distancia euclidiana entre las ciudades.
  */
-r32
+internal r32
 Distancia(i32 Ciudad1, i32 Ciudad2, v2 Coords[])
 {
     r32 Dx = Coords[Ciudad1].X - Coords[Ciudad2].X;
@@ -72,7 +85,7 @@ Distancia(i32 Ciudad1, i32 Ciudad2, v2 Coords[])
  * 
  * @return Acc - La aptitud de una solución.
  */
-r32
+internal r32
 Aptitud(i32 N, i32 Individuo[], v2 Coords[])
 {
     r32 Acc = 0.0f;
@@ -91,20 +104,20 @@ Aptitud(i32 N, i32 Individuo[], v2 Coords[])
  * 
  * @return La posición que contiene el menor valor en el arreglo Puntuaciones.
  */
-i32
+internal i32
 ConsigueMejor(r32 Puntuaciones[], i32 Len)
 {
-    r32 menor = Puntuaciones[0];
-    i32 posicion = 0;
+    r32 Menor = Puntuaciones[0];
+    i32 Posicion = 0;
     for (i32 I = 1; I < Len; I++)
     {
-        if (Puntuaciones[I] < menor)
+        if (Puntuaciones[I] < Menor)
         {
-            menor = Puntuaciones[I];
-            posicion = I;
+            Menor = Puntuaciones[I];
+            Posicion = I;
         }
     }
-    return posicion;
+    return Posicion;
 }
 
 /**
@@ -116,33 +129,39 @@ ConsigueMejor(r32 Puntuaciones[], i32 Len)
  * 
  * @return La posición que contiene el ganador del torneo.
  */
-i32
+internal i32
 Torneo(r32 Puntuaciones[], i32 Len)
 {
     i32 Random1 = rand() % Len;
     i32 Random2 = rand() % Len;
     i32 Random3 = rand() % Len;
     i32 Random4 = rand() % Len;
-    i32 Pos[] = {Random1, Random2, Random3, Random4};
-    r32 Arr[] = {Puntuaciones[Random1], Puntuaciones[Random2], Puntuaciones[Random3], Puntuaciones[Random4]};
+    i32 Random5 = rand() % Len;
+    i32 Pos[] = {Random1, Random2, Random3, Random4, Random5};
+    r32 Arr[] = {
+        Puntuaciones[Random1],
+        Puntuaciones[Random2],
+        Puntuaciones[Random3],
+        Puntuaciones[Random4],
+        Puntuaciones[Random5]
+    };
     return Pos[ConsigueMejor(Arr, 5)];
 }
 
 /**
  * Toma dos soluciones padre y las combina para generar una nueva solución hija.
  *
+ * @param NuevoIndividuo Donde se guardará el nuevo individuo que generamos.
  * @param Padre1 Solución del primer padre, la cual se recombinará.
  * @param Padre2 Solución del segundo padre, la cual se recombinará.
  * @param Mutacion Probabilidad de que la solución mute.
  * @param N Número de ciudades.
- * 
- * @return Solucion - Solución que combina a sus padres. Puede tener mutaciones.
  */
-i32*
-Recombina(i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
+internal void
+Recombina(i32 *NuevoIndividuo, i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
 {
     //Combinamos a los padres.
-    i32* Solucion = (i32*)malloc(sizeof(i32) * N);
+    i32* Solucion = NuevoIndividuo;
     std::vector<bool> Bitmap(N, 0);
     i32 Pos1 = rand() % N;
     i32 Pos2 = rand() % N;
@@ -181,22 +200,21 @@ Recombina(i32 *Padre1, i32 *Padre2, r32 Mutacion, i32 N)
         Solucion[Random1] = Solucion[Random2];
         Solucion[Random2] = Temp;
     }
-    return Solucion;
 }
 
 /**
- * Encuentra los mejores 5 valores entre la generación y las respuestas
+ * Encuentra los mejores NUM_ELITE valores entre la generación y las respuestas
  * previamente contenidas en la élite.
  *
- * @param Elite Un arreglo que contiene las 5 mejores soluciones encontradas al
- *              momento.
+ * @param Elite Un arreglo que contiene las NUM_ELITE mejores soluciones
+ *              encontradas al momento.
+ * @param EliteNueva Arreglo donde se guardará la nueva élite que generaremos.
  * @param Poblacion Arreglo con las soluciones de la generación actual.
  * @param Puntuaciones Puntos asignados a cada solución de la generación actual.
- * 
- * @return Nuevo arreglo con los 5 mejores individuos encontrados.
  */
-i32**
-ActualizaElite(i32 **Elite, i32 **Poblacion, r32 *Puntuaciones, i32 P, i32 N)
+internal void
+ActualizaElite(i32 *Elite, i32 *EliteNueva, i32 *Poblacion, r32 *Puntuaciones,
+        i32 P, i32 N, bool PrimeraVez)
 {
     // Guardamos la puntuación y el índice de la solución en Poblacion.
     std::vector<std::pair<r32, i32>> Pares;
@@ -204,7 +222,7 @@ ActualizaElite(i32 **Elite, i32 **Poblacion, r32 *Puntuaciones, i32 P, i32 N)
         Pares.push_back({Puntuaciones[I], I});
     }
 
-    // Ordenamos las puntuaciones en órden ascendente
+    // Ordenamos las puntuaciones en orden ascendente
     //(dando prioridad a las menores puntuaciones).
     std::sort(Pares.begin(), Pares.end());
 
@@ -212,16 +230,19 @@ ActualizaElite(i32 **Elite, i32 **Poblacion, r32 *Puntuaciones, i32 P, i32 N)
     std::vector<i32*> CandidatosAll;
     std::vector<r32> PuntuacionesAll;
     
-    for (i32 I = 0; I < 5; ++I) {
-        if (Elite[I] != nullptr) {
-            CandidatosAll.push_back(Elite[I]);
+    // Agregamos a la élite
+    for (i32 I = 0; I < NUM_ELITE; ++I) {
+        if (!PrimeraVez) {
+            CandidatosAll.push_back(GetIndividuo(Elite, N, I));
             PuntuacionesAll.push_back(std::numeric_limits<r32>::max());
         }
     }
 
-    i32 Candidatos = std::min(P, 5);
+    // Agregamos la población normal
+    i32 Candidatos = std::min(P, NUM_ELITE);
     for (i32 I = 0; I < Candidatos; ++I) {
-        CandidatosAll.push_back(Poblacion[Pares[I].second]);
+        i32 Idx = Pares[I].second;
+        CandidatosAll.push_back(GetIndividuo(Poblacion, N, Idx));
         PuntuacionesAll.push_back(Pares[I].first);
     }
 
@@ -234,17 +255,12 @@ ActualizaElite(i32 **Elite, i32 **Poblacion, r32 *Puntuaciones, i32 P, i32 N)
     // Ordenamos a los candidatos.
     std::sort(CandidatosOrdenados.begin(), CandidatosOrdenados.end());
 
-    // Crear el nuevo arreglo de la élite
-    i32** EliteNueva = (i32**)malloc(sizeof(i32*) * 5);
-
     // Copiamos las 5 mejores soluciones a la nueva élite.
-    for (i32 I = 0; I < 5; ++I) {
-        EliteNueva[I] = (i32*)malloc(sizeof(i32) * N);
-        for (i32 J = 0; J < N; ++J) {
-            EliteNueva[I][J] = CandidatosOrdenados[I].second[J];
-        }
+    for (i32 I = 0; I < NUM_ELITE; ++I) {
+        i32 *IndividuoViejo = CandidatosOrdenados[I].second;
+        i32 *IndividuoNuevo = GetIndividuo(EliteNueva, N, I);
+        memcpy(IndividuoNuevo, IndividuoViejo, sizeof(i32)*N);
     }
-    return EliteNueva;
 }
 
 /**
@@ -256,7 +272,7 @@ ActualizaElite(i32 **Elite, i32 **Poblacion, r32 *Puntuaciones, i32 P, i32 N)
  * 
  * @return 1 (everything ok).
  */
-b32
+internal b32
 Main(tsp_instance *__restrict__ Tsp,
         i32 *__restrict__ out_Permutation,
         u64 *__restrict__ Iterations,
@@ -268,31 +284,100 @@ Main(tsp_instance *__restrict__ Tsp,
     // Creamos una población inicial aleatoria y la evaluamos.
     i32 N = Tsp->N;
     i32 TamPoblacion = std::max(2*N, 1000);
-    i32 **Poblacion = CrearPoblacion(N, TamPoblacion);
+
+    i32 *Poblacion = (i32*)malloc(sizeof(i32) * N*TamPoblacion);
+    
+    // Si falla malloc, termina
+    if (!Poblacion)
+    {
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+
+    IniciaPoblacion(Poblacion, N, TamPoblacion);
+
     r32 *Puntuaciones = (r32*)malloc(sizeof(r32) * TamPoblacion);
+    // Si falla malloc, termina
+    if (!Puntuaciones)
+    {
+        free(Poblacion);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+
+    // Evalúa cada candidato
     for (i32 I = 0; I < TamPoblacion; I++)
     {
-        Puntuaciones[I] = Aptitud(N, Poblacion[I], Tsp->Coords);
+        i32 *Individuo = GetIndividuo(Poblacion, N, I);
+        Puntuaciones[I] = Aptitud(N, Individuo, Tsp->Coords);
     }
 
-    // Creamos arreglos auxiliares para guardar la generación actual y la anterior.
-    // o en este caso la generación anterior y la nueva.
-    i32 **NuevaGeneracion = (i32**)malloc(sizeof(i32*) * TamPoblacion);
-    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * TamPoblacion);
-
-    // Guardamos las 5 mejores soluciones encontradas hasta el momento.
-    i32 **Elite = (i32**)malloc(sizeof(i32*) * 5);
-    r32 *PuntuacionesElite = (r32*)malloc(sizeof(r32) * 5);
-
-    Elite = ActualizaElite(Elite, Poblacion, Puntuaciones, TamPoblacion, N);
-
-    for (i32 I = 0; I < 5; I++)
+    // Creamos arreglos auxiliares para guardar la generación actual y la
+    // anterior, o en este caso la generación anterior y la nueva.
+    i32 *NuevaGeneracion = (i32*)malloc(sizeof(i32) * N*TamPoblacion);
+    if (!NuevaGeneracion)
     {
-        PuntuacionesElite[I] = Aptitud(N, Elite[I], Tsp->Coords);
+        free(Poblacion);
+        free(Puntuaciones);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+    r32 *NuevasPuntuaciones = (r32*)malloc(sizeof(r32) * TamPoblacion);
+    if (!NuevasPuntuaciones)
+    {
+        free(Poblacion);
+        free(Puntuaciones);
+        free(NuevaGeneracion);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
     }
 
+    // Guardamos las (NUM_ELITE) mejores soluciones encontradas hasta el momento.
+    i32 *Elite = (i32*)malloc(sizeof(i32) * NUM_ELITE*N);
+    if (!Elite)
+    {
+        free(Poblacion);
+        free(Puntuaciones);
+        free(NuevaGeneracion);
+        free(NuevasPuntuaciones);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+    i32 *EliteNueva = (i32*)malloc(sizeof(i32) * NUM_ELITE*N);
+    if (!EliteNueva)
+    {
+        free(Poblacion);
+        free(Puntuaciones);
+        free(NuevaGeneracion);
+        free(NuevasPuntuaciones);
+        free(Elite);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+    r32 *PuntuacionesElite = (r32*)malloc(sizeof(r32) * NUM_ELITE);
+    if (!PuntuacionesElite)
+    {
+        free(Poblacion);
+        free(Puntuaciones);
+        free(NuevaGeneracion);
+        free(NuevasPuntuaciones);
+        free(Elite);
+        free(EliteNueva);
+        IGNORE_RESULT(write(1, ERR_MALLOC, sizeof(ERR_MALLOC)));
+        return 0;
+    }
+    ActualizaElite(Elite, EliteNueva, Poblacion, Puntuaciones, TamPoblacion, N, true);
+    std::swap(Elite, EliteNueva);
+
+    for (i32 I = 0; I < NUM_ELITE; I++)
+    {
+        i32 *Individuo = GetIndividuo(Elite, N, I);
+        PuntuacionesElite[I] = Aptitud(N, Individuo, Tsp->Coords);
+    }
+
+    u64 MaxIt = *Iterations;
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
-    for (u64 I = 0; I < *Iterations; I++)
+    for (u64 I = 0; I < MaxIt; I++)
     {
         // Para cada elemento de la población elegimos 2 padres. Su posición de
         // generación anterior y el ganador de un torneo entre 5 elecciones aleatorias.
@@ -300,42 +385,56 @@ Main(tsp_instance *__restrict__ Tsp,
         // una solución buena.
         for (i32 J = 0; J < TamPoblacion; J++)
         {
-            i32 *Padre1 = Poblacion[J];
-            i32 PosElite = rand() % 5;
-            i32 *PadreElite = Elite[PosElite];
+            i32 *Padre1 = GetIndividuo(Poblacion, N, J);
+            i32 PosElite = rand() % NUM_ELITE;
+            i32 *PadreElite = GetIndividuo(Elite, N, PosElite);
             i32 PosPadre = Torneo(Puntuaciones, TamPoblacion);
-            i32 *Padre2 = Poblacion[PosPadre];
+            i32 *Padre2 = GetIndividuo(Poblacion, N, PosPadre);
             if (PuntuacionesElite[PosElite] < Puntuaciones[PosPadre])
             {
                 Padre2 = PadreElite;
             }
-            NuevaGeneracion[J] = Recombina(Padre1, Padre2, 0.5f, N);
+            i32 *Hijo = GetIndividuo(NuevaGeneracion, N, J);
+            Recombina(Hijo, Padre1, Padre2, 0.5f, N);
         }
         // Evaluamos la población recién generada.
         for (i32 K = 0; K < TamPoblacion; K++)
         {
-            NuevasPuntuaciones[K] = Aptitud(N, NuevaGeneracion[K], Tsp->Coords);
+            i32 *Individuo = GetIndividuo(NuevaGeneracion, N, I);
+            NuevasPuntuaciones[K] = Aptitud(N, Individuo, Tsp->Coords);
         }
         // Elegimos la mejor solución (la que minimiza la distancia) y la guardamos.
-        i32 *Sol = NuevaGeneracion[ConsigueMejor(NuevasPuntuaciones, TamPoblacion)];
-        memcpy(out_Permutation,Sol,sizeof(i32)*N);
+        i32 *Sol = GetIndividuo(NuevaGeneracion, N,
+                ConsigueMejor(NuevasPuntuaciones, TamPoblacion));
+        memcpy(out_Permutation, Sol, sizeof(i32)*N);
         // La nueva generación se vuelve la generación anterior para la siguiente iteración.
-        memcpy(Poblacion,NuevaGeneracion,sizeof(i32*)*TamPoblacion);
-        memcpy(Puntuaciones,NuevasPuntuaciones,sizeof(r32)*TamPoblacion);
+        std::swap(Poblacion, NuevaGeneracion);
+        std::swap(Puntuaciones, NuevasPuntuaciones);
 
-        Elite = ActualizaElite(Elite, Poblacion, Puntuaciones, TamPoblacion, N);
+        ActualizaElite(Elite, EliteNueva, Poblacion, Puntuaciones, TamPoblacion, N, false);
+        std::swap(Elite, EliteNueva);
 
         // Actualizamos las puntuaciones de la élite.
-        for (i32 I = 0; I < 5; I++)
+        for (i32 I = 0; I < NUM_ELITE; I++)
         {
-            PuntuacionesElite[I] = Aptitud(N, Elite[I], Tsp->Coords);
+            i32 *Individuo = GetIndividuo(Elite, N, I);
+            PuntuacionesElite[I] = Aptitud(N, Individuo, Tsp->Coords);
         }
         // Revisamos que la solución con mejor puntaje al momento sea suficiente.
         if(Aptitud(N, out_Permutation, Tsp->Coords) <= Cutoff)
         {
-            *Iterations = I;
+            *Iterations = I + 1;
             break;
         }
     }
+
+    free(Poblacion);
+    free(Puntuaciones);
+    free(NuevaGeneracion);
+    free(NuevasPuntuaciones);
+    free(Elite);
+    free(EliteNueva);
+    free(PuntuacionesElite);
+
     return 1;
 }

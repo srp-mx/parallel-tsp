@@ -52,7 +52,7 @@ solver_Name()
 const char *
 solver_Description()
 {
-    return "Follows the concept explained in the dissertation at\n"
+    return "Follows the concept explained in the dissertation at "
         "http://132.248.9.195/ptd2023/septiembre/0846778/Index.html";
 }
 
