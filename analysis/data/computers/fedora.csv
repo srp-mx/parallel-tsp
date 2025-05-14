@@ -16,8 +16,6 @@ L2 Cache,2 MiB (4 instances)
 L3 Cache,4 MiB (1 instance)
 OpenMP Version,4.5
 Total RAM (GB),14.55
-RAM Speed,N/A
-RAM CAS Latency,N/A
 CUDA Capable Device,N/A
 CUDA Version,N/A
 AVX Supported,Yes
