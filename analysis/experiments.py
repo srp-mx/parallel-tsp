@@ -19,7 +19,7 @@ selected_problems = [
 ]
 cutoff_percent = lambda prob_size : 1 + (0.01 * round(1+log10(prob_size)**2))
 executions = 30
-max_iterations = 10_000
+max_iterations = 6_000
 
 # Information on some problems
 
@@ -219,7 +219,7 @@ send("iterations " + str(max_iterations))
 send("executions " + str(executions))
 for problem in selected_problems:
     send("problem " + problem)
-    cutoff = 0# lower_bounds[problem] * cutoff_percent(dimensions[problem])
+    cutoff = lower_bounds[problem] * cutoff_percent(dimensions[problem])
     send("cutoff " + str(cutoff))
     send("run")
 finish()
