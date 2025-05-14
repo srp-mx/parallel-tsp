@@ -77,9 +77,9 @@ GetPoblacion(i32 *Islas, i32 P, i32 N, i32 I)
 
 template <typename T>
 internal inline T*
-GetDatoPoblacion(T *Islas, i32 P, i32 I)
+GetDatoPoblacion(T *Datos, i32 P, i32 I)
 {
-    return Islas + P*I;
+    return Datos + P*I;
 }
 
 /**
@@ -324,15 +324,16 @@ ActualizaElite(i32 *Elite, i32 *EliteNueva, i32 *Poblacion, r32 *Puntuaciones,
 }
 
 internal void
-RemezclaElite(i32 *Elite, r32 *PuntuacionesElite)
+RemezclaElite(i32 N, i32 *Elite, r32 *PuntuacionesElite)
 {
-    i32 N = NUM_ELITE * MaxThreads;
-    for (i32 R = N-1; R > 0; R--)
+    i32 Buf[N];
+    i32 M = NUM_ELITE * MaxThreads;
+    for (i32 R = M-1; R > 0; R--)
     {
         i32 L = rand() % (R+1);
-        i32 Tmp = Elite[L];
-        Elite[L] = Elite[R];
-        Elite[R] = Tmp;
+        memcpy(Buf, GetIndividuo(Elite, N, L), sizeof(i32)*N);
+        memcpy(GetIndividuo(Elite, N, L), GetIndividuo(Elite, N, R), sizeof(i32)*N);
+        memcpy(GetIndividuo(Elite, N, R), Buf, sizeof(i32)*N);
         r32 Tmpf = PuntuacionesElite[L];
         PuntuacionesElite[L] = PuntuacionesElite[R];
         PuntuacionesElite[R] = Tmpf;
@@ -576,7 +577,7 @@ Main(tsp_instance *__restrict__ Tsp,
     }
 
     std::swap(IslasElite, IslasEliteNuevas);
-    RemezclaElite(IslasElite, PuntuacionesEliteT);
+    RemezclaElite(N, IslasElite, PuntuacionesEliteT);
 
     u64 MaxIt = *Iterations;
     // Ejecutamos el algoritmo el número de iteraciones especificadas.
@@ -601,20 +602,12 @@ Main(tsp_instance *__restrict__ Tsp,
                     PuntuacionesElite, out_Perm, out_PermFit, Tsp);
         }
 
-        r32 BestCostNow = MejoresCostos[0];
-        i32 BestCostIdxNow = 0;
-        for (i32 K = 1; K < MaxThreads; K++)
-        {
-            if (MejoresCostos[K] < BestCostNow)
-            {
-                BestCostIdxNow = K;
-                BestCostNow = MejoresCostos[K];
-            }
-        }
+        i32 MejorS = ConsigueMejor(MejoresCostos, MaxThreads);
+        i32 *S = GetIndividuo(MejoresSols, N, MejorS);
+        memcpy(out_Permutation, S, sizeof(i32)*N);
 
-        if (BestCostNow <= Cutoff)
+        if (MejoresCostos[MejorS] <= Cutoff)
         {
-            memcpy(out_Permutation, MejoresSols + BestCostIdxNow*N, sizeof(i32)*N);
             *Iterations = I+1;
             break;
         }
@@ -622,7 +615,7 @@ Main(tsp_instance *__restrict__ Tsp,
         std::swap(Islas, NuevasIslas);
         std::swap(PuntuacionesT, NuevasPuntuacionesT);
         std::swap(IslasElite, IslasEliteNuevas);
-        RemezclaElite(IslasElite, PuntuacionesEliteT);
+        RemezclaElite(N, IslasElite, PuntuacionesEliteT);
     }
 
     free(Islas);
