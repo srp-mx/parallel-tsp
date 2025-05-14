@@ -22,15 +22,22 @@
 #define PROBA_ELITISMO 0.05f
 #define PROBA_HIJO_GRATIS 0.1f
 
+/**
+ * Estructura para obtener números aleatorios con estado autocontenido.
+ */
 struct rng
 {
     std::random_device RD_;
     std::mt19937 Generator_;
 
+    /** Constructor */
     rng()
       : Generator_(RD_())
     { }
 
+    /**
+     * Da un i32 de 0 hasta N-1 inclusivo.
+     */
     i32
     Rng_i32(i32 N)
     {
@@ -38,6 +45,9 @@ struct rng
         return Distribution(Generator_);
     }
 
+    /**
+     * Da un r32 de 0 hasta 1 inclusivo.
+     */
     r32
     Rng_r32()
     {
@@ -323,6 +333,14 @@ ActualizaElite(i32 *Elite, i32 *EliteNueva, i32 *Poblacion, r32 *Puntuaciones,
     }
 }
 
+/**
+ * Realiza un shuffle de toda la élite, incluso entre islas, para que se
+ * comuniquen los resultados de las diferentes poblaciones.
+ *
+ * @param N Número de ciudades.
+ * @param Elite Toda la élite.
+ * @param PuntuacionesElite Todas las puntuaciones de la élite.
+ */
 internal void
 RemezclaElite(i32 N, i32 *Elite, r32 *PuntuacionesElite)
 {
@@ -332,7 +350,8 @@ RemezclaElite(i32 N, i32 *Elite, r32 *PuntuacionesElite)
     {
         i32 L = rand() % (R+1);
         memcpy(Buf, GetIndividuo(Elite, N, L), sizeof(i32)*N);
-        memcpy(GetIndividuo(Elite, N, L), GetIndividuo(Elite, N, R), sizeof(i32)*N);
+        memcpy(GetIndividuo(Elite, N, L), GetIndividuo(Elite, N, R),
+                sizeof(i32)*N);
         memcpy(GetIndividuo(Elite, N, R), Buf, sizeof(i32)*N);
         r32 Tmpf = PuntuacionesElite[L];
         PuntuacionesElite[L] = PuntuacionesElite[R];
@@ -340,6 +359,9 @@ RemezclaElite(i32 N, i32 *Elite, r32 *PuntuacionesElite)
     }
 }
 
+/**
+ * Ejecuta el algoritmo secuencial (cpuseq) sin muchas modificaciones. 
+ */
 internal void
 EjecutaSecuencial(i32 N,
         i32 TamPoblacion,
