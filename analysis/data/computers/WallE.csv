@@ -1,0 +1,32 @@
+Parameter,Value
+Hostname,WallE
+OS Info,"Ubuntu 22.04.5 LTS, Kernel: 5.15.167.4-microsoft-standard-WSL2"
+glibc Version,2.35
+CPU Model,AMD Ryzen 5 2600 Six-Core Processor
+CPU Vendor,AuthenticAMD
+CPU Flags,3dnowprefetch abm adx aes apic arat avx avx2 bmi1 bmi2 clflush clflushopt clzero cmov cmp_legacy constant_tsc cpuid cr8_legacy cx16 cx8 de decodeassists extd_apicid f16c flushbyasid fma fpu fsgsbase fxsr fxsr_opt ht hypervisor ibpb lahf_lm lm mca mce misalignsse mmx mmxext movbe msr mtrr nonstop_tsc nopl npt nrip_save nx osvw osxsave pae pat pausefilter pclmulqdq pdpe1gb perfctr_core pfthreshold pge pni popcnt pse pse36 rdrand rdrnd rdseed rdtscp rep_good sep sha sha_ni smap smep ssbd sse sse2 sse4_1 sse4_2 sse4a ssse3 svm syscall topoext tsc tsc_reliable tsc_scale v_vmsave_vmload virt_ssbd vmcb_clean vme vmmcall xgetbv1 xsave xsavec xsaveerptr xsaveopt
+Logical Cores,12
+Physical Cores,6
+Base Frequency (MHz),0.0
+Boost Frequency (MHz),0.0
+Chipset,N/A
+L1d Cache,192 KiB (6 instances)
+L1i Cache,384 KiB (6 instances)
+L2 Cache,3 MiB (6 instances)
+L3 Cache,8 MiB (1 instance)
+OpenMP Version,4.5
+Total RAM (GB),15.60
+RAM Speed,N/A
+RAM CAS Latency,N/A
+CUDA Capable Device,Yes
+NVIDIA GPU Model,NVIDIA GeForce GTX 1060 6GB
+Global Memory,6.00 GB
+Shared Memory per Block,N/A
+Warp Size,N/A
+Streaming Multiprocessor Count,N/A
+Compute Capability,N/A
+CUDA Core Count,N/A
+PCIe Bus Bandwidth,N/A
+CUDA Version,12.5
+AVX Supported,Yes
+SSE Supported,Yes
