@@ -1,0 +1,49 @@
+{
+    "metadata": {
+        "datetime": "2025-05-14T02_01_33.694Z",
+        "problem": "berlin52",
+        "solver": "CPU Parallel Genetic Solver",
+        "n": 52,
+        "executions": 1,
+        "cutoff": 8.000000e+03,
+        "hit_percent": 1.000000e+00,
+        "machine": "hp"
+    },
+    "best_solution": {
+        "route": [ 33, 43, 10, 9, 8, 41, 19, 45, 39, 40, 38, 37, 46, 16, 29, 50, 20, 23, 30, 7, 2, 42, 21, 17, 3, 18, 31, 22, 32, 49, 1, 44, 34, 36, 35, 48, 24, 5, 6, 15, 4, 25, 12, 28, 27, 26, 47, 14, 13, 52, 11, 51 ],
+        "cost": 7.972788e+03,
+        "idx": 0
+    },
+    "stats": {
+        "cost": {
+            "avg": 7.972788e+03,
+            "stdev": -nan,
+            "min": 7.972788e+03,
+            "max": 7.972788e+03
+        },
+        "seconds": {
+            "avg": 3.079333e+00,
+            "stdev": -nan,
+            "min": 3.079333e+00,
+            "max": 3.079333e+00
+        },
+        "cycles": {
+            "avg": 7.066018e+09,
+            "stdev": -nan,
+            "min": 7066018360,
+            "max": 7066018360
+        },
+        "iterations": {
+            "avg": 7.300000e+01,
+            "stdev": -nan,
+            "min": 73,
+            "max": 73
+        }
+    },
+    "raw_metrics": {
+        "costs": [ 7.972788e+03 ],
+        "seconds": [ 3.079333e+00 ],
+        "cycles": [ 7066018360 ],
+        "iterations": [ 73 ]
+    }
+}

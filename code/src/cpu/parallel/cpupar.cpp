@@ -1,5 +1,8 @@
 #include "solver.h"
 
+#include <omp.h>
+global_variable i32 MaxThreads = -1;
+
 #include "solve.cpp"
 
 /*Copyright (C) 2025
@@ -43,7 +46,7 @@ solver_Compatibility()
 const char *
 solver_Name()
 {
-    return "CPU Sequential Genetic Solver";
+    return "CPU Parallel Genetic Solver";
 }
 
 /**
@@ -52,18 +55,21 @@ solver_Name()
 const char *
 solver_Description()
 {
-    return "Follows the concept explained in the dissertation at "
-        "http://132.248.9.195/ptd2023/septiembre/0846778/Index.html";
+    return "Follows both the concept explained in the dissertation at "
+        "http://132.248.9.195/ptd2023/septiembre/0846778/Index.html"
+        " and extends it with ideas of the model from the paper at "
+        "http://difu100cia.uaz.edu.mx/index.php/difuciencia/article/view/145";
 }
 
 /**
- * Does nothing.
+ * Stores the maximum available number of threads.
  *
  * @return 1 (everything ok) or 0 (error).
  */
 b32
 solver_Setup()
 {
+    MaxThreads = omp_get_max_threads();
     return 1;
 }
 
@@ -89,6 +95,8 @@ solver_Solve(tsp_instance *__restrict__ Tsp,
              r32 Cutoff)
 {
     b32 resultado = Main(Tsp, out_Permutation, Iterations, Cutoff);
-    IGNORE_RESULT(write(1, "Listo\n", 6));
+    char PrintRes[18+21] = {};
+    size_t PrintLen = sprintf(PrintRes, "Listo (%d hilos)\n", MaxThreads);
+    IGNORE_RESULT(write(1, PrintRes, PrintLen));
     return resultado;
 }

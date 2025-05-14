@@ -1,11 +1,11 @@
 #!/bin/bash
 
 name="cpupar"
-build_dir="../../bin/${name}/"
+build_dir="../../../bin/${name}/"
 this_dir="$(pwd)"
 
-extensions="-g"
-optimizations="-O0"
+extensions="-msse -mavx -march=native"
+optimizations="-O3 -ftree-vectorize -funroll-loops"
 libs="-lm"
 warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
 stripping="-fno-rtti -fno-exceptions"

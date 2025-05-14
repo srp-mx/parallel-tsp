@@ -3,8 +3,8 @@
 build_dir="../../bin/"
 this_dir="$(pwd)"
 
-extensions="-g"
-optimizations="-O0 -march=native -ftree-vectorize"
+extensions="-msse -mavx -march=native"
+optimizations="-O3 -march=native -ftree-vectorize -funroll-loops"
 libs="-ldl"
 warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch"
 stripping="-fno-rtti -fno-exceptions"

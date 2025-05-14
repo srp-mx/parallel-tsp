@@ -5,7 +5,7 @@ build_dir="../../../bin/${name}/"
 this_dir="$(pwd)"
 
 extensions="-msse -mavx -march=native"
-optimizations="-O3 -ftree-vectorize"
+optimizations="-O3 -ftree-vectorize -funroll-loops"
 libs="-lm"
 warns="-Wall -Wextra -Wno-unused-parameter -Wno-switch -fdiagnostics-show-option"
 stripping="-fno-rtti -fno-exceptions"
