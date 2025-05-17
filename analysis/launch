@@ -7,6 +7,6 @@ python3 -m venv ${ENV_DIR}
 source ${ENV_DIR}/bin/activate
 
 pip install --upgrade pip
-pip install numpy pandas matplotlib seaborn jupyterlab ipykernel python-language-server python-lsp-server[all] jupyterlab-latex jupyterlab-lsp
+pip install numpy pandas matplotlib seaborn jupyterlab ipykernel python-language-server python-lsp-server[all] jupyterlab-latex jupyterlab-lsp scipy
 
 jupyter lab --no-browser --ip $(python3 -c "import subprocess; subprocess.run(['hostname', '-I'], text=True).stdout")
