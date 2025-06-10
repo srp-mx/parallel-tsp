@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <dlfcn.h>
 
-#define MAIN_MAJOR_VERSION 1
+#define MAIN_MAJOR_VERSION 2
 
 #include "defines.h"
 #include "config.h"

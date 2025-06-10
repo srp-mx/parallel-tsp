@@ -32,7 +32,7 @@ global_variable cudaDeviceProp DeviceProperties;
 u64
 solver_Version()
 {
-    return 1;
+    return 2;
 }
 
 /**
@@ -41,7 +41,7 @@ solver_Version()
 u64
 solver_Compatibility()
 {
-    return 1;
+    return 2;
 }
 
 /**
@@ -110,6 +110,9 @@ solver_Unload() {}
  * @param out_Permutation An array to be filled in with the best solution.
  * @param Iterations Has the maximum number of iterations and the ones executed
  *                   are written back into it.
+ * @param Cutoff If this value is reached or passed, we stop immediately.
+ * @param Parallelism Number of islands (thread blocks), if zero lets the
+ *                    solver decide.
  * 
  * @return 1 if everything is ok, or 0 otherwise.
  */
@@ -117,7 +120,8 @@ b32
 solver_Solve(tsp_instance *__restrict__ Tsp,
              i32 *__restrict__ out_Permutation,
              u64 *__restrict__ Iterations,
-             r32 Cutoff)
+             r32 Cutoff,
+             i32 Parallelism)
 {
-    return Main(Tsp, out_Permutation, Iterations, &DeviceProperties, Cutoff);
+    return Main(Tsp, out_Permutation, Iterations, &DeviceProperties, Cutoff, Parallelism);
 }

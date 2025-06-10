@@ -443,7 +443,8 @@ Main(tsp_instance *__restrict__ Tsp,
         i32 *__restrict__ out_Permutation,
         u64 *__restrict__ Iterations,
         cudaDeviceProp *__restrict__ DevProp,
-        r32 Cutoff)
+        r32 Cutoff,
+        i32 Parallelism)
 {
     const auto MaxBlockThreads = DevProp->maxThreadsPerBlock;
     const auto ShmPerBlock = DevProp->sharedMemPerBlock;
@@ -455,8 +456,17 @@ Main(tsp_instance *__restrict__ Tsp,
     cudaOccupancyMaxPotentialBlockSizeVariableSMem(
             (i32*)&Islands, (i32*)&Population, NextGeneration,
             ConvertBlockSizeToShmSize());
-    Population = max(4*WarpSize, Population);
-    Islands = max(Islands, (2*Tsp->N + Population - 1)/Population);
+
+    if (Parallelism == 0)
+    {
+        Population = max(4*WarpSize, Population);
+        Islands = max(Islands, (2*Tsp->N + Population - 1)/Population);
+    }
+    else
+    {
+        Population = max(4*WarpSize, Population);
+        Islands = Parallelism;
+    }
 
     // Print execution settings
     char SettingsStr[sizeof(STRFMT_SETTINGS) + 21] = {};

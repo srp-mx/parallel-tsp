@@ -28,7 +28,8 @@ typedef void solver_Unload();
 typedef b32 solver_Solve(tsp_instance *Tsp,
                          i32 *out_Permutation,
                          u64 *Iterations,
-                         r32 Cutoff);
+                         r32 Cutoff,
+                         i32 Parallelism);
 
 /**
  * Structure to hold all solver function pointers.

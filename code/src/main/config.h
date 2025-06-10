@@ -28,6 +28,7 @@
 #define FMTSTR_ITERS "ITERACIONES: %lu\n"
 #define FMTSTR_EXECS "EJECUCIONES: %lu\n"
 #define FMTSTR_CUTOFF "COSTO DE CORTE: %e\n"
+#define FMTSTR_PARAL "PARALELISMO: %d\n"
 
 /**
  * Contains the execution configuration.
@@ -42,6 +43,7 @@ struct config
     solver Solver;
     u64 Iterations, Executions;
     r32 Cutoff;
+    i32 Parallelism;
 };
 
 /**
@@ -79,7 +81,9 @@ ConfigToStr(config *Config, char *Buffer)
             + sizeof(FMTSTR_ITERS) + sizeof(FMTSTR_EXECS) + ProblemNameLen
             + ProblemCommentLen + 20*3 + strlen(SolverName)
             + strlen(SolverDesc)
-            + sizeof(FMTSTR_CUTOFF) + 25 + 1;
+            + sizeof(FMTSTR_CUTOFF) + 25
+            + sizeof(FMTSTR_PARAL) + 25
+            + 1;
     }
 
     // If there is a buffer, just sprintf it.
@@ -106,6 +110,10 @@ ConfigToStr(config *Config, char *Buffer)
     if (Config->Cutoff > 0.0f)
     {
         Written += sprintf(Buffer+Written, FMTSTR_CUTOFF, Config->Cutoff);
+    }
+    if (Config->Parallelism > 0)
+    {
+        Written += sprintf(Buffer+Written, FMTSTR_PARAL, Config->Parallelism);
     }
 
     return Written;

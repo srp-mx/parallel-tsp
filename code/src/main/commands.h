@@ -79,6 +79,7 @@ PrintHelp(config *__restrict__ Config, char *__restrict__ Arg)
         "    iterations <entero positivo>: Asigna el número de iteraciones por ejecución\n"
         "    executions <entero positivo>: Asigna el número de ejecuciones del algoritmo\n"
         "    cutoff <número positivo>: Asigna el valor suficiente de costo de la solución\n"
+        "    parallelism <entero positivo o -1>: Asigna el nivel de paralelismo, sujeto al solucionador\n"
         "    config: Imprime los datos de la configuración actual\n"
         "    exit: Cierra el programa\n"
         "    run: Ejecuta el programa con la configuración dada\n"
@@ -284,6 +285,26 @@ SetCutoff(config *__restrict__ Config, char *__restrict__ Arg)
 }
 
 /**
+ * Sets the level of parallelism to use, whose meaning depends on the solver.
+ *
+ * @param Config The configuration object.
+ * @param Arg The pointer argument to the value to store.
+ */
+internal void
+SetParallelism(config *__restrict__ Config, char *__restrict__ Arg)
+{
+    char *End;
+    Config->Parallelism = (i32)strtol(Arg, &End, 10);
+    if (!Config->Parallelism || Config->Parallelism < -1)
+    {
+        INSTANT_WRITE("Se esperaba un entero positivo o -1, lo cual no se leyó.\n");
+        Config->Iterations = 0;
+    }
+
+    if (Config->Parallelism == -1) Config->Parallelism = 0;
+}
+
+/**
  * Prints the state of the execution configuration.
  * Implements the `command` function type.
  *
@@ -363,6 +384,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
     u64 Iterations[Config->Executions] = {};
     r32 Cutoff = Config->Cutoff;
     r32 HitPercent = 0.0f;
+    i32 Parallelism = Config->Parallelism;
 
     for (u64 I = 0; I < Config->Executions; I++)
     {
@@ -377,7 +399,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
         b32 Ok;
         MEASURE_TIME(Time,
             Ok = Config->Solver.Solve(ProblemCopy, Route, Iterations+Execution,
-                    Cutoff);
+                    Cutoff, Parallelism);
         );
         Timings[Execution] = fsecs_Time;
         TimingsRdtsc[Execution] = rdtsc_Time;
@@ -401,7 +423,6 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
             {
                 INSTANT_WRITE("El solucionador dio una solución que repite "
                         "vértices.\n");
-                // TODO: DEBUG
                 for (i32 i = 0; i < Config->Tsp->N; i++)
                 {
                     printf("%d ", Route[i]);
@@ -461,6 +482,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
     ReportData.Execs = Config->Executions;
     ReportData.HitPercent = HitPercent;
     ReportData.Cutoff = Cutoff;
+    ReportData.Parallelism = Config->Parallelism;
 
     // Create the report
     char Report[ReportToStr(&ReportData, 0)];
@@ -491,7 +513,7 @@ Run(config *__restrict__ Config, char *__restrict__ Arg)
 }
 
 // Number of commands
-#define CMD_COUNT 9
+#define CMD_COUNT 10
 
 // List of command names
 global_variable const char *COMMAND_NAMES[CMD_COUNT] = {
@@ -501,6 +523,7 @@ global_variable const char *COMMAND_NAMES[CMD_COUNT] = {
     "iterations",
     "executions",
     "cutoff",
+    "parallelism",
     "config",
     "exit",
     "run"
@@ -514,6 +537,7 @@ global_variable const size_t COMMAND_NAME_LENS[CMD_COUNT] = {
     size_t(strlen("iterations")),
     size_t(strlen("executons")),
     size_t(strlen("cutoff")),
+    size_t(strlen("parallelism")),
     size_t(strlen("config")),
     size_t(strlen("exit")),
     size_t(strlen("run"))
@@ -527,6 +551,7 @@ global_variable const command *COMMANDS[CMD_COUNT] = {
     SetIterations,
     SetExecutions,
     SetCutoff,
+    SetParallelism,
     PrintConfig,
     Exit,
     Run

@@ -58,6 +58,10 @@ solver_Unload();
  * @param Cutoff The minimum cost deemed as a good solution. If a solution with
  *               this value or less is found, the solver HAS to terminate and
  *               return it.
+ * @param Parallelism The amount of parallelism the solver is to use. If it is
+ *                    zero, let the implementation decide. This may
+ *                    correspond with processors, threads, nodes, blocks, etc.
+ *                    depending on the implementation.
  * 
  * @return 1 if everything went ok.
  */
@@ -65,4 +69,5 @@ extern "C" EXPORT b32
 solver_Solve(tsp_instance *__restrict__ Tsp,
              i32 *__restrict__ out_Permutation,
              u64 *__restrict__ Iterations,
-             r32 Cutoff);
+             r32 Cutoff,
+             i32 Parallelism);

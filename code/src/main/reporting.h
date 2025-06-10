@@ -31,6 +31,7 @@
  *         "n": 123,
  *         "executions": 123,
  *         "cutoff": 12.34,
+ *         "parallelism": 16,
  *         "hit_percent": 0.13,
  *         "machine": "..."
  *     },
@@ -83,6 +84,7 @@
     "        \"n\": %d,\n" \
     "        \"executions\": %d,\n" \
     "        \"cutoff\": %e,\n" \
+    "        \"parallelism\": %d,\n" \
     "        \"hit_percent\": %e,\n" \
     "        \"machine\": \"%s\"\n" \
     "    },\n"
@@ -140,6 +142,7 @@ struct report_data
     i32 Execs;
     r32 HitPercent;
     r32 Cutoff;
+    i32 Parallelism;
 };
 
 /**
@@ -160,7 +163,7 @@ ReportToStr(report_data *Data, char *Buffer)
         size_t Written = 0;
         Written += sizeof(FMTSTR_REPORT)+1;
         Written += DateTimeStr(0) + strlen(Data->Problem)
-            + strlen(Data->Solver) + 20*2 + 25*2 + 10; // metadata values
+            + strlen(Data->Solver) + 20*2 + 25*3 + 10; // metadata values
         Written += 20*Data->N + 25 + 20; // best_solution values
         Written += 20*2*4 + 20*2*2 + 25*2*2; // stats values
         Written += 2*25*Data->Execs + 2*20*Data->Execs; // raw_metrics values
@@ -212,7 +215,7 @@ ReportToStr(report_data *Data, char *Buffer)
     return sprintf(Buffer, FMTSTR_REPORT,
         // "metadata"
         Datetime, Data->Problem, Data->Solver, Data->N, Data->Execs,
-        Data->Cutoff, Data->HitPercent, Machine,
+        Data->Cutoff, Data->Parallelism, Data->HitPercent, Machine,
         // "best_solution"
         RouteStr, Data->BestCost, Data->BestCostIdx,
         // "stats.cost"

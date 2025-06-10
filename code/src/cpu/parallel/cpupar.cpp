@@ -28,7 +28,7 @@ global_variable i32 MaxThreads = 1;
 u64
 solver_Version()
 {
-    return 1;
+    return 2;
 }
 
 /**
@@ -37,7 +37,7 @@ solver_Version()
 u64
 solver_Compatibility()
 {
-    return 1;
+    return 2;
 }
 
 /**
@@ -85,6 +85,8 @@ solver_Unload() {}
  * @param Tsp A pointer to the TSP instance to be read from.
  * @param out_Permutation An array with N spaces, to be 0 through N-1.
  * @param Iterations A single iteration will be executed, so it will write 1.
+ * @param Cutoff If we reach this value, we stop the search.
+ * @param Parallelism Number of threads to use.
  * 
  * @return 1 (everything ok).
  */
@@ -92,8 +94,11 @@ b32
 solver_Solve(tsp_instance *__restrict__ Tsp,
              i32 *__restrict__ out_Permutation,
              u64 *__restrict__ Iterations,
-             r32 Cutoff)
+             r32 Cutoff,
+             i32 Parallelism)
 {
+    if (Parallelism) MaxThreads = Parallelism;
+    omp_set_num_threads(MaxThreads);
     char PrintRes[18+21] = {};
     size_t PrintLen = sprintf(PrintRes, "Vamos (%d hilos)\n", MaxThreads);
     IGNORE_RESULT(write(1, PrintRes, PrintLen));
