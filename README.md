@@ -17,6 +17,7 @@ simply use
 
 ### Index
 - [Project proposal](docs/propuesta/latex)
+- [Project report](docs/reporte/latex)
 
 ## Compilation
 
@@ -123,13 +124,14 @@ Once inside the program, you can type the following for instructions
 help
 ```
 
-There are 9 commands, all of which admit either 0 or 1 argument:
+There are 10 commands, all of which admit either 0 or 1 argument:
 - `help` Shows a help dialogue.
 - `problem` Loads a problem in `code/data/tsp/*.tsp`.
 - `solver` Loads a solver, unloading the one active beforehand.
 - `iterations` Sets the maximum number of iterations per execution.
 - `executions` Sets the number of executions from scratch.
 - `cutoff` Sets the solution cost cutoff.
+- `parallelism` Sets the amount of parallel "units" to use.
 - `config` Shows the current configuration to launch the solver with.
 - `exit` Exits the program, also doable with `ctrl-D`.
 - `run` Executes the solver with the current configuration.

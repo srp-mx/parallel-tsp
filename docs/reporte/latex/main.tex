@@ -1,12 +1,13 @@
 \documentclass{article}
 \usepackage{../../util/estilo}
 
-\renewcommand{\TituloMain}[0]{Tarea 4}
-\newcommand{\MateriaMain}[0]{Implementación de un Algoritmo Genético Paralelo para el Problema del Agente Viajero}
-\newcommand{\FechaMain}[0]{23 de Mayo de 2025}
+\renewcommand{\TituloMain}[0]{Reporte de Proyecto}
+\newcommand{\SubtituloMain}[0]{Implementación de un Algoritmo Genético Paralelo para el Problema del Agente Viajero}
+\newcommand{\MateriaMain}[0]{Complejidad Computacional \& Algoritmos Paralelos}
+\newcommand{\FechaMain}[0]{12 de Junio de 2025}
 
 \begin{document}
-    \begin{titlepage}
+           \begin{titlepage}
     \begin{centering}
 
         \thispagestyle{empty}
@@ -27,7 +28,6 @@
                 \textbf{Facultad de Ciencias}\\[0.1cm]
                 \textbf{\MateriaMain}\\[0.1cm]
                 \textbf{Semestre 2025-2}\\[0.1cm]
-                \textbf{Integrantes: }\\[0.1cm]
                 319526240 - Romero Palacios Santiago\\[0.1cm]
                 320268135 - Nava Córdova Mariana\\[0.1cm]
                 \FechaMain
@@ -42,12 +42,11 @@
         \end{center}
         \rule{\linewidth}{0.1mm}
         
-        
-        
         \date{}
         \vspace{0.5cm}
         \vspace{0.5cm}
-            {\scshape\Huge \textcolor{RoyalBlue}{\TituloMain} \par}
+            {\scshape\LARGE \textcolor{Gray}{\TituloMain} \par}
+            {\scshape\Huge \textcolor{RoyalBlue}{\SubtituloMain} \par}
             {
                 \vspace*{2mm}
                 \begin{center}\begin{minipage}{6.5cm}
@@ -55,13 +54,34 @@
                 \end{minipage}\end{center}
             }
         \vspace{0.5cm}
-        
+
+        \subsection*{Resumen/Abstract}
+
+        Elaboramos y evaluamos un programa que resuelve el problema del agente
+        viajero mediante un algoritmo genético en paralelo, tanto en CPU como
+        en GPU. Para ello, se realizó una implementación en secuencial y dos en
+        paralelo: en CPU con \href{https://www.openmp.org/}{OpenMP} y GPU con
+        \href{https://developer.nvidia.com/cuda-toolkit}{CUDA}. El lenguaje de
+        elección fue C++. Indagamos qué tan eficientemente podemos obtener
+        buenas aproximaciones de problemas NP-Duros con hardware moderno de
+        grado de consumidor, usando el problema del agente viajero euclidiano
+        en su versión de optimización como caso de estudio. En GPU seguimos
+        cercanamente a \cite[84-90]{ipn_gpu}, y para la versión secuencial a
+        \cite[55-69]{pav_tesis}. Utilizamos las recomendaciones de evaluación
+        de metaheurísticas en paralelo de \cite{alba_ch2}.
+ 
         \vspace{1cm}
         \vfill
     \end{centering}
     \end{titlepage}
 
-    %\InsertaSubarchivo{Ejercicio 1}{Ejercicio 1}{1-p_np.tex}
+    \InsertaSubarchivo{Motivación}{Motivación}{motivacion.tex}
+    \InsertaSubarchivo{Preliminares}{Preliminares}{preliminares.tex}
+    \InsertaSubarchivo{Metodología}{Metodología}{metodologia.tex}
+    \InsertaSubarchivo{Resultados}{Resultados}{resultados.tex}
+    \InsertaSubarchivo{Análisis de Resultados}{Análisis de Resultados}{analisis.tex}
+    \InsertaSubarchivo{Conclusiones}{Conclusiones}{conclusiones.tex}
+    \InsertaSubarchivo{Apéndices}{Apéndices}{apendices.tex}
 
     \pagestyle{logotipos}
 

@@ -1,0 +1,71 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Problema del Agente Viajero}
+    \subsubsection*{Problema del Agente Viajero}
+\end{cajaEnunciado}
+
+El problema del agente viajero (PAV o bien TSP) consiste en encontrar el camino
+más corto que permita a un viajero recorrer un conjunto de ciudades exactamente
+una vez y regresar al punto de origen. Dado que pertenece a la clase de
+problemas NP-duro (también conocido como NP-difícil), su resolución exacta se
+vuelve intractable conforme el número de ciudades crece, lo que hace
+imprescindible el uso de heurísticas y metaheurísticas para obtener soluciones
+aproximadas de calidad. \parencite{pav_tesis} \parencite{cormen}
+
+La tesis de \cite{pav_tesis} aborda diferentes enfoques heurísticos, como el
+método del vecino más cercano, inserción aleatorizada y la mejora mediante
+búsqueda local con 2-intercambio (2-opt). Estas estrategias se conocen como
+metaheurísticas de trayectoria, pues se sigue un camino en búsqueda del óptimo.
+Otra técnica que aborda, es la del algoritmo genético, que exploraremos a
+continuación.
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Algoritmos Genéticos}
+    \subsubsection*{Algoritmos Genéticos}
+\end{cajaEnunciado}
+
+Los algoritmos genéticos son una clase de algoritmos evolutivos inspirados en
+la teoría de la evolución de Darwin \parencite{genintro}. Operan sobre una
+población de soluciones codificadas como cromosomas (en el problema del agente
+viajero, permutaciones de ciudades) y aplican operadores de selección,
+cruzamiento y mutación para generar nuevas soluciones.
+
+Su fuerte es su capacidad para explorar amplias regiones del espacio de
+búsqueda y evitar caer fácilmente en óptimos locales. Algunos enfoques
+recientes han combinado estos algoritmos con técnicas como “extinciones
+masivas” \parencite{tsp_ext} o restricciones propias de problemas relacionados
+como el de rutas de vehículos (VRP) \parencite{prv_gen}.
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Algoritmos Paralelos}
+    \subsubsection*{Algoritmos Paralelos}
+\end{cajaEnunciado}
+
+Dado que muchos de los pasos en algoritmos genéticos, como la evaluación de
+aptitud, la selección o la cruza pueden ejecutarse de manera independiente, su
+implementación en paralelo suele mejorar considerablemente la eficiencia,
+especialmente cuando se trata de instancias de gran tamaño.
+\parencite{paralevol} \parencite{alba_ch2}
+
+Para implementar este paralelismo, se han desarrollado herramientas como OpenMP
+y CUDA, ampliamente utilizadas en el cómputo de alto rendimiento.
+
+OpenMP es una interfaz de programación que facilita la ejecución paralela en
+arquitecturas de memoria compartida, como los procesadores multinúcleo.
+Esto nos permite dividir automáticamente tareas repetitivas como los bucles en
+distintos hilos de ejecución. \parencite{omp}
+
+Por otro lado, CUDA es una plataforma desarrollada por NVIDIA que permite
+ejecutar código en GPU, las cuales están diseñadas para realizar miles de
+operaciones en paralelo con sus numerosos CUDA cores (así como otro tipo de
+núcleos de procesamiento), agrupados en Streaming Multiprocessors, que a su vez
+se agrupan en TPCs y estos en GPCs. Esto convierte a CUDA en una herramienta
+práctica para acelerar cálculos intensivos, como la evaluación masiva de rutas
+o la aplicación simultánea de operadores genéticos. \parencite{cuda}
+\parencite{ipn_gpu}
+
+\end{document}

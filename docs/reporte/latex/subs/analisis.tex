@@ -1,0 +1,49 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+Igual que en la sección anterior, referimos al notebook realizado, pero
+compartimos algunas observaciones relevantes.
+
+Una observación importante es para las gráficas en un espacio log-log, debemos
+interpretar rectas como polinomios con el mismo grado que la pendiente. Esto es
+porque rectas en el espacio log-log se transforman en leyes de potencias:
+$$\log{y} = m\log{x} + b \iff e^{\log{y}} = e^{m\log{x}+b} \iff y = e^bx^m$$
+
+Esto es particularmente práctico para un análisis empírico de algoritmos pues
+únicamente incluye al término polinomial dominante y la constante oculta
+correspondiente.
+
+Saltándonos directamente a las ejecuciones por punto de corte, pues nos interesa
+comparar la parelelización, podemos notar que en general para los tiempos: la
+implementación en GPU es la más rápida, después la implementación en CPU en
+paralelo, y finalmente en secuencial.
+
+A pesar de ello, entre las implementaciones paralelas el speedup de la versión
+en CPU se acerca mucho más al speedup lineal, mientras que la GPU con más de 1000
+CUDA cores no alcanza ni el $1\%$ de eficiencia.
+
+Además, al notar que la versión paralela en CPU nos reduce en cerca de 80 veces el
+número de iteraciones que realiza la simulación, entonces podemos argumentar que si
+optimizamos más el tiempo que toma una única iteración podríamos fácilmente obtener
+un speedup superlineal, lo cual es reportado en la bibliografía. \parencite{alba_ch2}
+
+Esto nos quiere decir que también nuestra implementación en GPU debería aún poder
+verse mucho más eficiente, pues el speedup es extremadamente bajo. Sospechamos que
+tiene que ver con el costo de la instrumentación, que involucra además constantes
+movimientos por el bus PCIe entre GPU y CPU.
+
+Así, nuestra versión con OpenMP pareciera ser escalable, pero como vemos en
+alguna de las figuras, el comportamiento del tiempo es tan errático que
+seguramente depende de la configuración particular geométrica del problema en
+lugar de  únicamente su tamaño. Por lo tanto, habría que realizar aún más
+mediciones.
+
+Otra consideración es que teníamos un techo en el número de iteraciones, lo
+que nos sugiere que el speedup real podría ser mucho mayor, pero se cortó el
+experimento en un techo alto antes de ello. Esto quiere decir que nuestro
+speedup es una cota inferior al speedup que observaríamos realmente.
+
+\end{document}
+

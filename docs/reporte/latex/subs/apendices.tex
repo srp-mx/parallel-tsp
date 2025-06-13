@@ -1,0 +1,129 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Manual de Usuario}
+    \textbf{Manual de Usuario}
+\end{cajaEnunciado}
+
+\vspace*{2mm}
+
+\begin{mdframed}[linewidth=2pt]
+
+\section*{TSP Paralelo}
+\emph{Esta es una herramienta para utilizar y comparar distintos solucionadores para el TSP Euclidiano en 2D.}
+
+\subsection*{Documentación}
+\subsubsection*{Compilación}
+Se requiere \texttt{lualatex} y varios paquetes de LaTeX. Si usas Linux, se recomienda buscar en el repositorio de tu distribución un paquete como \texttt{texlive-all} o \texttt{texlive-full}.  
+
+Dentro del directorio \texttt{latex} de cada documentación, si estás en Linux, puedes simplemente ejecutar:
+\begin{verbatim}
+./run
+\end{verbatim}
+
+\subsubsection*{Índice}
+\begin{itemize}
+  \item Propuesta del proyecto: \texttt{docs/propuesta/latex}
+  \item Informe del proyecto:   \texttt{docs/reporte/latex}
+\end{itemize}
+
+\subsection*{Compilación}
+Se asume que estás en Linux, ya que actualmente no brindamos soporte para otras plataformas.  
+Como mínimo, necesitarás una CPU \texttt{x86\_64} y el compilador \texttt{g++}, que a menudo se incluye en un paquete de tu distribución llamado \texttt{build-essential} o \texttt{base-devel}.
+
+\subsubsection*{Punto de entrada}
+Primero debes compilar el programa que configura la ejecución. Este programa se encuentra en \texttt{code/src/main/}.  
+Puedes modificar el script \texttt{build} a tu gusto y luego ejecutar la compilación con:
+\begin{verbatim}
+./build
+\end{verbatim}
+Si ya tienes solucionadores compilados, puedes ejecutar el programa con:
+\begin{verbatim}
+./run
+\end{verbatim}
+
+\subsubsection*{Solucionadores}
+Son bibliotecas dinámicas que buscan las soluciones candidatas para las instancias del TSP Euclidiano 2D. Funcionan como programas independientes del ejecutable \texttt{main}, ya que pueden requerir soporte de hardware y/o software especializado y permiten depuración casi en tiempo real al recargarlas en ejecución.  
+Es decir, puedes ejecutar el binario \texttt{./main} y luego recompilar cualquier solucionador cuando quieras hacer cambios sin reiniciar el programa. El único requisito es descargar la biblioteca antes de compilar, cambiando a otro solucionador.
+
+\paragraph{Dummy}
+El solucionador \texttt{dummy} devuelve los nodos en el orden recibido; es solo para depuración.  
+Para compilarlo, ingresa a \texttt{code/src/dummy/} y ejecuta:
+\begin{verbatim}
+./build
+\end{verbatim}
+
+\paragraph{Genético secuencial}
+El solucionador \texttt{cpuseq} implementa un algoritmo genético en ejecución secuencial y sirve como punto de comparación.  
+Para compilarlo, ingresa a \texttt{code/src/cpu/sequential/} y ejecuta:
+\begin{verbatim}
+./build
+\end{verbatim}
+
+\paragraph{Genético paralelo}
+El solucionador \texttt{cpupar} aplica la técnica fork-join al mismo algoritmo que \texttt{cpuseq}. Sirve como punto de comparación para una implementación paralela ingenua en CPU. Para compilarlo es necesario instalar OpenMP, pero si ya cuentas con el archivo de objeto compartido (\texttt{.so}), no lo necesitas para ejecutar.  
+Para compilarlo, ve a \texttt{code/src/cpu/parallel/} y ejecuta:
+\begin{verbatim}
+./build
+\end{verbatim}
+
+\paragraph{Genético GPU}
+El solucionador \texttt{gpu} implementa un algoritmo genético adaptado a la arquitectura GPU y, por lo tanto, requiere hardware y software especializados. Para compilarlo es necesario instalar el CUDA Toolkit, aunque no requieres una GPU de inmediato: basta con tener disponible y funcional el compilador \texttt{nvcc}. Para ejecutarlo, necesitas una GPU NVIDIA de arquitectura Pascal o superior; sin embargo, si ya dispones del archivo compartido (\texttt{.so}), no requieres el CUDA Toolkit.  
+Para compilarlo, ingresa a \texttt{code/src/gpu/} y ejecuta:
+\begin{verbatim}
+./build
+\end{verbatim}
+
+\subsection*{Ejecución}
+Por defecto, tras compilar el programa principal y algunos solucionadores, sus archivos ELF se ubican en \texttt{code/data/}. Puedes ejecutar \texttt{./main} desde ahí o entrar a \texttt{code/src/main/} y ejecutar \texttt{./run}.  
+
+Dentro del programa, escribe:
+\begin{verbatim}
+help
+\end{verbatim}
+para ver las instrucciones. Hay 10 comandos, cada uno admite 0 o 1 argumento:
+\begin{itemize}
+  \item \texttt{help}        Muestra la ayuda.
+  \item \texttt{problem}     Carga un problema en \texttt{code/data/tsp/*.tsp}.
+  \item \texttt{solver}      Carga un solucionador, descargando el activo previamente.
+  \item \texttt{iterations}  Establece el número máximo de iteraciones por ejecución.
+  \item \texttt{executions}  Establece la cantidad de ejecuciones desde cero.
+  \item \texttt{cutoff}      Establece el umbral de costo de solución.
+  \item \texttt{parallelism} Define el número de “unidades” paralelas.
+  \item \texttt{config}      Muestra la configuración actual para lanzar el solucionador.
+  \item \texttt{exit}        Sale del programa, también con Ctrl-D.
+  \item \texttt{run}         Ejecuta el solucionador con la configuración actual.
+\end{itemize}
+
+Por ejemplo, \texttt{problem a280} carga el problema del archivo \texttt{code/data/tsp/a280.tsp}, y \texttt{solver dummy} carga la biblioteca \texttt{code/data/dummy.so}.  
+La diferencia entre \texttt{iterations} y \texttt{executions} es que una iteración suele depender de la anterior, mientras que cada ejecución reinicia el solucionador desde cero, sin considerar las previas. Realizar múltiples ejecuciones permite obtener la media, la desviación estándar muestral u otras métricas estadísticas en configuraciones idénticas.  
+
+Al ejecutarse, el programa muestra información de la ejecución generada por los solucionadores y la guarda en \texttt{code/data/logs/} como un archivo JSON con marca de tiempo.
+
+\subsection*{Agregar solucionadores}
+Crea una biblioteca dinámica que incluya, o al menos cumpla con, la interfaz definida en \texttt{code/src/include/solver.h}. Asegúrate de implementar todas las funciones.  
+Agrega tu archivo \texttt{.so}, preferiblemente con un nombre corto y único, en \texttt{code/data/}.  
+
+Eso es todo. Así de simple.  
+
+Ahora puedes cargar, por ejemplo, \texttt{my\_solver.so} con:
+\begin{verbatim}
+solver my_solver
+\end{verbatim}
+
+\end{mdframed}
+
+\vspace*{2mm}
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Liga al repositorio}
+    \textbf{Liga al repositorio}
+\end{cajaEnunciado}
+
+\begin{center}{\LARGE \href{https://github.com/srp-mx/parallel-tsp}{https://github.com/srp-mx/parallel-tsp}}\end{center}
+
+\end{document}
+

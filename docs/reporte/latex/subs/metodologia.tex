@@ -1,0 +1,206 @@
+\documentclass[main.tex]{subfiles}
+\usepackage{util/estilo}
+
+\begin{document}
+
+Se elaboraron cuatro programas, los cuales constan de tres solucionadores y un
+configurador ejecutable.
+
+El configurador permite intercambiar el solucionador, seleccionar el número
+máximo de iteraciones, seleccionar el número de ejecuciones del programa,
+cambiar el nivel de paralelismo, seleccionar el problema a resolver, etc.
+
+El configurador además mostrará estadísticas de las ejecuciones del
+solucionador junto con la mejor solución encontrada, así como las guardará en
+archivos en formato JSON. Además, validará que las soluciones candidatas sean
+válidas y que reporten su costo adecuadamente. Así nos aseguramos de que los
+solucionadores sean correctos.
+
+A continuación describiremos los solucionadores, que satisfacen la siguiente
+interfaz de C.
+
+\begin{minted}{C}
+// La versión del solucionador.
+extern "C" EXPORT u64 solver_Version();
+
+// La versión del configurador con el cual es compatible el solucionador.
+extern "C" EXPORT u64 solver_Compatibility();
+
+// El nombre del solucionador.
+extern "C" EXPORT const char * solver_Name();
+
+// La descripción del solucionador.
+extern "C" EXPORT const char * solver_Description();
+
+// Inicialización al cargar el solucionador.
+extern "C" EXPORT b32 solver_Setup();
+
+// Realiza el proceso de desinicialización necesario al cerrar el solucionador.
+extern "C" EXPORT void solver_Unload();
+
+// Da una solución aproximada al problema.
+extern "C" EXPORT b32
+solver_Solve(tsp_instance *__restrict__ Tsp,
+             i32 *__restrict__ out_Permutation,
+             u64 *__restrict__ Iterations,
+             r32 Cutoff,
+             i32 Parallelism);
+\end{minted}
+
+En todo caso, realizamos las pruebas de rendimiento de los solucionadores con
+instancias obtenidas de TSPLIB95, las cuales se encarga de leer nuestro
+configurador.
+
+En particular, se realizarán dos tipos de pruebas, de esfuerzo máximo y de
+corte, donde en las pruebas por esfuerzo máximo corremos el solucionador un
+número fijo de iteraciones, mientras que mediante punto de corte, si alcanzamos
+un valor suficientemente cercano al óptimo conocido nos detenemos.
+
+Esto es así pues como menciona \parencite{alba_ch2}, nos interesa encontrar
+el tiempo neto en que encontramos una solución aceptable, además de que nos
+interesa conocer el comportamiento de convergencia con respecto al tamaño del
+problema.
+
+Además, tendremos que ejecutar todas las pruebas un número estadísticamente
+significativo de veces, pues estamos tratando con algoritmos fundamentalmente
+aleatorios. Esto también es algo que se menciona en \parencite{alba_ch2}.
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Programa Secuencial}
+    \textbf{Descripción del Programa Secuencial}
+\end{cajaEnunciado}
+
+Se elaboró un solucionador secuencial \texttt{cpuseq} para comparar el
+rendimiento y speedup con el resto de los programas.
+
+A continuación describiremos las partes principales del algoritmo genético
+implementado.
+
+\textbf{Población}
+
+Se genera una población inicial aleatoria de tamaño máximo entre $2n$ y $1000$,
+donde $n$ es el número de vértices del problema de entrada.
+
+Esto es conformado por un arreglo de permutaciones de números de cero hasta el
+tamaño de la población $P$.
+
+\textbf{Generación}
+
+La primera generación será construida aleatoriamente y conservaremos a los 5
+mejores individuos.
+
+\textbf{Selección}
+
+La selección de los dos individuos de la población actual $P^t$ que se cruzarán
+para dejar su descendiente en $P_i^{t+1}$ será dada por $P_i^t$ y $P_j^t$ donde
+$j$ es el ganador de un torneo de cinco individuos tomados aleatoriamente.
+
+En otras palabras, escogeremos para la ``casilla'' $i$ a quien ya está ahí y al
+ganador de tomar 5 otros individuos al azar.
+
+Tomaremos a un individuo de élite como el segundo padre con baja probabilidad,
+en particular para las pruebas que realizamos usamos el 10\%.
+
+\textbf{Cruza}
+
+Escogeremos un intervalo aleatorio $[a,b] \subseteq \cjto{0,1,2,\dots,n-1}$ y
+primero ubicamos a todos los elementos en $P_i^t[k]$ para todo $k\in [a,b]$.
+Después colocaremos en $P_i^{t+1}$ para toda $k\in [0,b]$ a los valores
+$P_j^t[k]$ que no se encuentren entre los elementos que identificamos
+anteriormente. Luego, agregamos a todo $P_i^t[k]$ con $k\in[a,b]$ y finalmente
+agregamos a todo $P_j^t[k]$ para $k\in[b,n-1]$ que no estén en el conjunto que
+identificamos de $P_i$.
+
+Así, en $O(n)$ construimos la cruza, donde intuitivamente el proceso que
+realizamos fue tomar un intervalo de un padre e insertarlo a la mitad del otro,
+cuidando el no repetir u omitir vértices.
+
+Si tras la mutación y evaluación del individuo $P_i^{t+1}$ este tiene una
+calificación peor que el individuo $P_i^{t}$ entonces con una probabilidad del
+10\% lo puede aún reemplazar, pero si es mejor entonces siempre lo reemplazará.
+
+\textbf{Mutación}
+
+Escogeremos otro intervalo aleatorio $[a,b] \subseteq \cjto{0,1,2,\dots,n-1}$ e
+invertiremos el orden de las ciudades en el intervalo en $P_i^{t+1}$ por cada
+posición $i$ de $P^{t+1}$.
+
+Esto es conveniente pues notemos que las adyacencias de la ruta que describe
+nuestra permutación únicamente cambia en dos lugares: en los extremos del
+intervalo $[a,b]$. La técnica de mutación ingenua intercambiaría la posición
+de dos ciudades, pero notemos que eso nos cambia ambas adyacencias de las dos
+ciudades, resultando en un cambio de 4 adyacencias.
+
+Generalmente es conveniente realizar mutaciones pequeñas, pues de lo contrario
+estamos realmente realizando una búsqueda por fuerza bruta en lugar de
+aprovechar del algoritmo genético.
+
+De acuerdo a esto último que mencionamos, la mutación tiene un porcentaje
+asociado de ocurrir. Para este solucionador en particular, estuvimos utilizando
+una probabilidad de mutación del 10\%.
+
+\textbf{Elitismo}
+
+Iremos acumulando a 5 individuos de élite, los cuales son los mejores
+individuos que hemos visto en toda la ejecución del programa.
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Programa Paralelo (CPU)}
+    \textbf{Descripción del Programa Paralelo en CPU con OpenMP}
+\end{cajaEnunciado}
+
+Generamos poblaciones aisladas por cada procesador, a las cuales llamamos islas.
+
+Esto tiene un fundamento heurístico, pues lo que ayuda a un algoritmo genético
+suele ser la disponibilidad de una variedad genética diversa. Al tener
+poblaciones que evolucionan por separado, aunque una población converja a un
+cierto grupo reducido de ``genotipos'', es muy poco probable que varias
+poblaciones aisladas tengan en conjunto los mismos genes.
+
+Para ``comunicar'' a las islas, lo que realizamos fue un operador que nombramos
+remezclado de élite, el cual realiza un shuffle sobre los individuos de élite
+de las islas, para que en el proceso de selección pueda efectivamente tomar a
+buenos individuos con genes que evolucionaron prácticamente de manera
+independiente.
+
+Otro cambio que realizamos para la implementación en paralelo fue que diseñamos
+nuestra clase para generación de números aleatorios, pues \texttt{rand} y
+\texttt{srand} nos causarían condiciones de carrera porque modifican estado
+interno.
+
+La paralelización se realizó con OpenMP, que llamamos dos veces, una para
+ejecutar el algoritmo genético sobre cada isla, y la segunda vez para la
+generación de la población inicial.
+
+\begin{cajaEnunciado}
+    \addcontentsline{toc}{subsubsection}{Programa Paralelo (GPU)}
+    \textbf{Descripción del Programa Paralelo en GPU con CUDA}
+\end{cajaEnunciado}
+
+Para esta implementación seguimos a \parencite{ipn_gpu}, donde similarmente a
+la implementación con OpenMP utilizamos la noción de islas para grupos de
+individuos, pero además incluimos una isla de élite la cual, como su nombre lo
+indica, contiene a todos los individuos de élite.
+
+En este caso, el tamaño de cada población es decidida por el hardware, de modo
+que es máxima mientras que el requerimiento de memoria compartida es
+satisfactible por bloque.
+
+Asímismo, el número de bloques es suficiente para llenar los Streaming
+Multiprocessors (SM) de la GPU para alcanzar una ocupación máxima, y además
+para que puedan haber al menos $2n$ individuos netamente. Esto puede ser
+sobreescrito, pues para este solucionador el nivel de paralelismo corresponde
+con el número de islas, i.e. bloques. Esto se realiza con la directiva
+\mbox{\texttt{cudaOccupancyMaxPotentialBlockSizeVariableSMem}}.
+
+Además, el tamaño de la población será de al menos 4 veces el tamaño del warp,
+lo cual suele ser el mínimo recomendado para eficientar los accesos a memoria,
+la ocupación de los SM y el \textit{scheduling} de tareas en el GPU.
+\parencite{cudaworks}
+
+Con respecto a nuestra isla de élite, lo que cambiará con respecto a la
+implementación de OpenMP es que tendrá un único individuo que represente a cada
+bloque, escogido por reducción paralela sobre los hilos del mismo bloque al que
+cuente con mejor calificación.
+
+\end{document}
